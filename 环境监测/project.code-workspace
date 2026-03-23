@@ -1,0 +1,30 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "files.associations": {
+      "stm32f10x_rcc.h": "c",
+      "stm32f10x_exti.h": "c",
+      "exti_key.h": "c",
+      "stm32f10x.h": "c",
+      "led.h": "c",
+      "stm32f10x_gpio.h": "c",
+      "systick.h": "c",
+      "adc.h": "c",
+      "usart.h": "c",
+      "math.h": "c",
+      "mq2.h": "c",
+      "dht11.h": "c",
+      "usart2.h": "c",
+      "esp8266.h": "c",
+      "timer.h": "c",
+      "stdio.h": "c",
+      "system.h": "c",
+      "MPU6050.H": "cpp",
+    },
+  },
+  "extensions": {},
+}

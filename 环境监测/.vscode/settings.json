@@ -1,0 +1,10 @@
+{
+  "C_Cpp.errorSquiggles": "Disabled",
+  "files.encoding": "gbk",
+  "files.autoGuessEncoding": true,
+  "files.associations": {
+    "systick.h": "c",
+    "max30102.h": "c",
+    "mpu6050.h": "c"
+  }
+}

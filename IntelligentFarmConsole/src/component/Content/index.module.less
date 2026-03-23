@@ -1,0 +1,24 @@
+.content {
+    height: 100%;
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 50px;
+        border-bottom: 1.5px solid #e5e5e5;
+        box-sizing: border-box;
+        padding: 0 20px;
+
+        >h2 {
+            font-weight: 500;
+        }
+    }
+
+    .children {
+        height: calc(100% - 50px);
+        padding: 20px;
+        overflow: auto;
+    }
+
+}
