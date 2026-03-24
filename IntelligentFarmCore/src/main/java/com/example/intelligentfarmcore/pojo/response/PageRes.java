@@ -35,6 +35,11 @@ public class PageRes<T> {
         this.content = content;
     }
 
+    public PageRes(List<T> content, int total) {
+        this.total = (long) total;
+        this.content = content;
+    }
+
     public Long getTotal() {
         return total;
     }

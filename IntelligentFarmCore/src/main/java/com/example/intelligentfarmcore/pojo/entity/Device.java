@@ -33,8 +33,17 @@ public class Device {
     @Column(name = "gas_concentration")
     private Integer gasConcentration;
 
+    // 农场ID
+    @Column(name = "farm_id")
+    private Long farmId;
+
     @OneToOne(mappedBy = "device")
     private Room room;
+
+    // 关联的农场
+    @ManyToOne
+    @JoinColumn(name = "farm_id", insertable = false, updatable = false)
+    private Farm farm;
 
     // 构造方法
     public Device() {
@@ -62,6 +71,22 @@ public class Device {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    public Long getFarmId() {
+        return farmId;
+    }
+
+    public void setFarmId(Long farmId) {
+        this.farmId = farmId;
+    }
+
+    public Farm getFarm() {
+        return farm;
+    }
+
+    public void setFarm(Farm farm) {
+        this.farm = farm;
     }
 
     public Room getRoom() {

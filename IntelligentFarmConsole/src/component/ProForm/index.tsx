@@ -19,9 +19,9 @@ const ProForm = React.forwardRef((props: ProFormProps, ref) => {
   return (
     <Form {...formProps}>
       <Space style={{ width: "100%" }} orientation ="vertical" {...spaceProps}>
-      {_.compact(items).filter((item) => item.isRender !== false).map((item) => (
+      {_.compact(items).filter((item) => item.isRender !== false).map((item, index) => (
         item.isRender !== false && (
-          <Form.Item key={item.props.name} {...item.props}>
+          <Form.Item key={item.props.name || `form-item-${index}`} {...item.props}>
             {item.render || <Input/>}
           </Form.Item>
         )

@@ -59,5 +59,7 @@ instance.interceptors.response.use(
 
 export const get = (url, params) => instance.get(url, { params });
 export const post = (url, data) => instance.post(url, data);
+export const put = (url, data) => instance.put(url, data);
+export const del = (url) => instance.delete(url);
 export const isRequestSuccess = (res) => res.code === HTTP_STATUS.OK;
 export default instance;

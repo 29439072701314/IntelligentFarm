@@ -24,6 +24,8 @@ import Device from "../pages/home/children/Device";
 import DataCenter from "../pages/home/children/DataCenter";
 import DigitalHealth from "../pages/home/children/Elder/DigitalHealth";
 import ElderList from "../pages/home/children/Elder/ElderList";
+import FarmList from "../pages/home/children/Farm/FarmList";
+import LivestockList from "../pages/home/children/Livestock/LivestockList";
 
 export const publicMenuRoutes = [
   {
@@ -48,6 +50,36 @@ export const publicMenuRoutes = [
     path: "device",
     permission: ["admin"],
     element: <Device />,
+  },
+  {
+    label: "农场管理",
+    key: "farm",
+    icon: <HomeOutlined />,
+    path: "farm",
+    permission: ["admin"],
+    children: [
+      {
+        label: <NavLink to="/home/farm/farmList">农场列表</NavLink>,
+        key: "farmList",
+        path: "farmList",
+        element: <FarmList />,
+      },
+    ],
+  },
+  {
+    label: "牲畜管理",
+    key: "livestock",
+    icon: <HomeOutlined />,
+    path: "livestock",
+    permission: ["admin"],
+    children: [
+      {
+        label: <NavLink to="/home/livestock/livestockList">牲畜列表</NavLink>,
+        key: "livestockList",
+        path: "livestockList",
+        element: <LivestockList />,
+      },
+    ],
   },
   {
     label: "房间管理",
