@@ -50,7 +50,7 @@ export default function DiseaseManage() {
       if (searchParams.diseaseName) {
         condition.diseaseName = searchParams.diseaseName;
       }
-      if (searchParams.farmId) {
+      if (searchParams.farmId !== null && searchParams.farmId !== undefined) {
         condition.farmId = searchParams.farmId;
       }
       if (searchParams.status) {
