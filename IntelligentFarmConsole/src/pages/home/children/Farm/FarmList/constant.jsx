@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, Input } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, EyeOutlined, FieldTimeOutlined } from '@ant-design/icons';
 
-export const getColumns = (handleEdit, handleDelete, handleDetail) => {
+export const getColumns = (handleEdit, handleDelete, handleDetail, handleViewLivestock) => {
   return [
     {
       title: '农场名称',
@@ -38,6 +38,13 @@ export const getColumns = (handleEdit, handleDelete, handleDetail) => {
             onClick={() => handleDetail(record)}
           >
             详情
+          </Button>
+          <Button
+            type="link"
+            icon={<FieldTimeOutlined />}
+            onClick={() => handleViewLivestock(record)}
+          >
+            查看牲畜
           </Button>
           <Button
             type="link"

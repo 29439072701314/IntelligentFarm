@@ -43,7 +43,7 @@ public class MyInterceptor implements HandlerInterceptor {
 
         //  token 不合法，返回错误
         if (claims == null){
-            ResponseMessage responseMessage = ResponseMessage.error(ErrorCode.TOKEN_INVALID.getCode(), ErrorCode.TOKEN_INVALID.getMessage());
+            ResponseMessage<String> responseMessage = ResponseMessage.error(ErrorCode.TOKEN_INVALID.getCode(), ErrorCode.TOKEN_INVALID.getMessage());
 
             // 转换为 JSONObject
             JSONObject jsonObject = (JSONObject) JSONObject.toJSON(responseMessage);

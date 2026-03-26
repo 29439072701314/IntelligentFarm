@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import { apiGetFarmList, apiDeleteFarm } from "@/services/farmApi";
 import ProTable from "@/component/ProTable";
 import Content from "@/component/Content";
@@ -11,6 +12,7 @@ import FarmDetailModal from "./component/FarmDetailModal";
 const { confirm } = Modal;
 
 export default function FarmList() {
+  const navigate = useNavigate();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [form] = Form.useForm();
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -59,6 +61,11 @@ export default function FarmList() {
     setDetailModalVisible(true);
   };
 
+  // 查看牲畜
+  const handleViewLivestock = (record) => {
+    navigate(`/home/livestock/livestockList?farmId=${record.farmId}`);
+  };
+
   // 批量删除农场
   const handleBatchDelete = async () => {
     if (selectedRowKeys.length === 0) {
@@ -97,7 +104,7 @@ export default function FarmList() {
         form={form}
         api={apiGetFarmList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleEdit, handleDelete, handleDetail)}
+        columns={getColumns(handleEdit, handleDelete, handleDetail, handleViewLivestock)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加

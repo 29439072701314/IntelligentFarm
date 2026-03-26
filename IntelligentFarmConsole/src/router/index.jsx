@@ -6,7 +6,6 @@ import {
   TeamOutlined,
   HomeOutlined,
   AlertOutlined,
-  UserOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
 import Error from "../pages/error";
@@ -18,14 +17,12 @@ import Files from "../pages/home/children/Files";
 import ChangePassword from "../pages/home/children/User/ChangePassword";
 import UserList from "../pages/home/children/User/UserList";
 import { filterRoutesByRole } from "../utils/permission";
-import RoomList from "../pages/home/children/Room/RommList";
-import RoomOccupancy from "../pages/home/children/Room/RoomOccupancy";
 import Device from "../pages/home/children/Device";
 import DataCenter from "../pages/home/children/DataCenter";
-import DigitalHealth from "../pages/home/children/Elder/DigitalHealth";
-import ElderList from "../pages/home/children/Elder/ElderList";
 import FarmList from "../pages/home/children/Farm/FarmList";
 import LivestockList from "../pages/home/children/Livestock/LivestockList";
+import FeedManage from "../pages/home/children/Feed/FeedManage";
+import DiseaseManage from "../pages/home/children/disease/diseasemanage";
 
 export const publicMenuRoutes = [
   {
@@ -82,48 +79,36 @@ export const publicMenuRoutes = [
     ],
   },
   {
-    label: "房间管理",
-    key: "room",
+    label: "饲料管理",
+    key: "feed",
     icon: <HomeOutlined />,
-    path: "room",
+    path: "feed",
     permission: ["admin"],
     children: [
       {
-        label: <NavLink to="/home/room/roomList">房间列表</NavLink>,
-        key: "roomList",
-        path: "roomList",
-        element: <RoomList />,
-      },
-      {
-        label: <NavLink to="/home/room/roomOccupancy">入住管理</NavLink>,
-        key: "roomOccupancy",
-        path: "roomOccupancy",
-        element: <RoomOccupancy />,
+        label: <NavLink to="/home/feed/feedManage">饲料管理</NavLink>,
+        key: "feedManage",
+        path: "feedManage",
+        element: <FeedManage />,
       },
     ],
   },
   {
-    label: "老人管理",
-    key: "elder",
-    icon: <UserOutlined />,
-    path: "elder",
-    permission: ["admin", "caregiver", "family"],
+    label: "疾病管理",
+    key: "disease",
+    icon: <AlertOutlined />,
+    path: "disease",
+    permission: ["admin"],
     children: [
       {
-        label: <NavLink to="/home/elder/elderList">老人列表</NavLink>,
-        key: "elderList",
-        path: "elderList",
-        element: <ElderList />,
-        permission: ["admin"],
-      },
-      {
-        label: <NavLink to="/home/elder/digitalHealth">数字健康</NavLink>,
-        key: "digitalHealth",
-        path: "digitalHealth",
-        element: <DigitalHealth />,
+        label: <NavLink to="/home/disease/diseaseManage">疾病管理</NavLink>,
+        key: "diseaseManage",
+        path: "diseaseManage",
+        element: <DiseaseManage />,
       },
     ],
   },
+
   {
     label: "账号管理",
     key: "user",

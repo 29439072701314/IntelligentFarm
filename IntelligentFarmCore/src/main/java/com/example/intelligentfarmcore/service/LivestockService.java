@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class LivestockService implements ILivestockService {
 
     @Autowired
     private LivestockDao livestockDao;
+    @Autowired
+    private DiseaseRecordService diseaseRecordService;
 
     @Override
     public ResponseMessage<PageRes<LivestockDTO>> getLivestockList(PageReq pageReq) {
@@ -45,7 +48,7 @@ public class LivestockService implements ILivestockService {
             int end = Math.min(start + pageReq.getPageSize(), livestockList.size());
             List<Livestock> pageLivestock = livestockList.subList(start, end);
             List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(pageLivestock);
-            int totalPages = (livestockList.size() + pageReq.getPageSize() - 1) / pageReq.getPageSize();
+
             PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size());
             return ResponseMessage.success(pageRes);
         } else {
@@ -57,12 +60,19 @@ public class LivestockService implements ILivestockService {
         }
     }
 
+    @Transactional
     @Override
     public ResponseMessage<Livestock> addLivestock(Livestock livestock) {
+        // 保存牲畜
         Livestock savedLivestock = livestockDao.save(livestock);
+        
+        // 检查健康状态，如果不健康，自动创建疾病记录
+        checkHealthStatusAndCreateDiseaseRecord(savedLivestock);
+        
         return ResponseMessage.success(savedLivestock, "新增牲畜成功");
     }
 
+    @Transactional
     @Override
     public ResponseMessage<Livestock> editLivestock(Livestock livestock) {
         // 检查牲畜是否存在
@@ -70,11 +80,23 @@ public class LivestockService implements ILivestockService {
         if (existingLivestock == null) {
             return ResponseMessage.error("牲畜不存在");
         }
+        
+        // 保存旧的健康状态
+        String oldHealthStatus = existingLivestock.getHealthStatus();
+        
         // 更新牲畜信息
         existingLivestock.setLivestockName(livestock.getLivestockName());
         existingLivestock.setLivestockType(livestock.getLivestockType());
         existingLivestock.setFarmId(livestock.getFarmId());
+        existingLivestock.setHealthStatus(livestock.getHealthStatus());
+        
         Livestock updatedLivestock = livestockDao.save(existingLivestock);
+        
+        // 如果健康状态从健康变为不健康，自动创建疾病记录
+        if (!"健康".equals(oldHealthStatus) && !"健康".equals(updatedLivestock.getHealthStatus())) {
+            checkHealthStatusAndCreateDiseaseRecord(updatedLivestock);
+        }
+        
         return ResponseMessage.success(updatedLivestock, "编辑牲畜成功");
     }
 
@@ -98,5 +120,47 @@ public class LivestockService implements ILivestockService {
             return ResponseMessage.error("牲畜不存在");
         }
         return ResponseMessage.success(livestock);
+    }
+    
+    // 检查健康状态并自动创建疾病记录
+    private void checkHealthStatusAndCreateDiseaseRecord(Livestock livestock) {
+        String healthStatus = livestock.getHealthStatus();
+        if (healthStatus == null) {
+            return;
+        }
+        
+        String livestockCode = livestock.getLivestockCode();
+        if (livestockCode == null || livestockCode.isEmpty()) {
+            return;
+        }
+        
+        // 根据健康状态创建相应的疾病记录
+        switch (healthStatus) {
+            case "患病":
+                diseaseRecordService.autoCreateDiseaseRecord(
+                    livestockCode, 
+                    "健康异常", 
+                    "牲畜健康状态为患病，需要检查具体症状"
+                );
+                break;
+            case "治疗中":
+                diseaseRecordService.autoCreateDiseaseRecord(
+                    livestockCode, 
+                    "治疗中", 
+                    "牲畜正在治疗中"
+                );
+                break;
+            case "亚健康":
+                diseaseRecordService.autoCreateDiseaseRecord(
+                    livestockCode, 
+                    "亚健康", 
+                    "牲畜处于亚健康状态，需要关注"
+                );
+                break;
+            // 健康状态不需要创建疾病记录
+            case "健康":
+            default:
+                break;
+        }
     }
 }
