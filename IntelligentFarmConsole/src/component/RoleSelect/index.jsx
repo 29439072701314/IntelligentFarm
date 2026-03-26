@@ -8,7 +8,7 @@ export default function RoleSelect(props) {
   const { needAdmin = false } = props;
   return (
     <Select
-      defaultValue={ROLE.ELDER}
+      defaultValue={ROLE.FARMER}
       options={needAdmin ? ROLE_LIST : ROLE_LIST_NOADMIN}
       prefix={<IdcardOutlined />}
       {...props}

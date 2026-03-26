@@ -90,7 +90,7 @@ const App = () => {
         <Logo isHideTitle={collapsed} />
         <Menu
           theme="dark"
-          defaultSelectedKeys={["options"]}
+          defaultSelectedKeys={["dataCenter"]}
           mode="inline"
           items={menuItems}
         />

@@ -70,6 +70,10 @@ public class User {
     @Column(name = "elder_ids", columnDefinition = "json")
     private Set<Long> elderIds;
 
+    // 审核状态：0-待审核，1-已审核
+    @Column(name = "status")
+    private Integer status;
+
     public HealthDevice getHealthDevice() {
         return healthDevice;
     }
@@ -174,6 +178,14 @@ public class User {
         this.elderIds = elderIds;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -185,6 +197,7 @@ public class User {
                 ", avatar='" + avatar + '\'' +
                 ", gender=" + gender +
                 ", birthday=" + birthday +
+                ", status=" + status +
                 '}';
     }
 }

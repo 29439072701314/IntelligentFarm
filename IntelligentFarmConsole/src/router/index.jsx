@@ -22,30 +22,23 @@ import DataCenter from "../pages/home/children/DataCenter";
 import FarmList from "../pages/home/children/Farm/FarmList";
 import LivestockList from "../pages/home/children/Livestock/LivestockList";
 import FeedManage from "../pages/home/children/Feed/FeedManage";
-import DiseaseManage from "../pages/home/children/disease/diseasemanage";
+import DiseaseManage from "../pages/home/children/Disease/DiseaseManage";
 
 export const publicMenuRoutes = [
-  {
-    label: <NavLink to="">首页</NavLink>,
-    key: "options",
-    icon: <PieChartOutlined />,
-    path: "",
-    element: <Options />,
-  },
   {
     label: <NavLink to="/home/dataCenter">数据中心</NavLink>,
     key: "dataCenter",
     icon: <PieChartOutlined />,
     path: "dataCenter",
     element: <DataCenter />,
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
   },
   {
     label: <NavLink to="/home/device">环境设备</NavLink>,
     key: "device",
     icon: <AlertOutlined />,
     path: "device",
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
     element: <Device />,
   },
   {
@@ -53,7 +46,7 @@ export const publicMenuRoutes = [
     key: "farm",
     icon: <HomeOutlined />,
     path: "farm",
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
     children: [
       {
         label: <NavLink to="/home/farm/farmList">农场列表</NavLink>,
@@ -68,7 +61,7 @@ export const publicMenuRoutes = [
     key: "livestock",
     icon: <HomeOutlined />,
     path: "livestock",
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
     children: [
       {
         label: <NavLink to="/home/livestock/livestockList">牲畜列表</NavLink>,
@@ -83,7 +76,7 @@ export const publicMenuRoutes = [
     key: "feed",
     icon: <HomeOutlined />,
     path: "feed",
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
     children: [
       {
         label: <NavLink to="/home/feed/feedManage">饲料管理</NavLink>,
@@ -98,7 +91,7 @@ export const publicMenuRoutes = [
     key: "disease",
     icon: <AlertOutlined />,
     path: "disease",
-    permission: ["admin"],
+    permission: ["admin", "farmer"],
     children: [
       {
         label: <NavLink to="/home/disease/diseaseManage">疾病管理</NavLink>,
@@ -190,7 +183,13 @@ export const createDynamicRouter = (userRole) => {
     {
       path: "/home",
       element: <LayOut />,
-      children: homeRoutes,
+      children: [
+        {
+          index: true,
+          element: <NavLink to="/home/dataCenter" replace />,
+        },
+        ...homeRoutes,
+      ],
     },
   ]);
   console.log(router);

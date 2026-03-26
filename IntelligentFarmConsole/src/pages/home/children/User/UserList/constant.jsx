@@ -9,7 +9,7 @@ import GenderTag from "../../../../../component/GenderTag";
 import RoomNumberTag from "../../../../../component/RoomNumberTag";
 import { GAP, ROLE } from "../../../../../constant";
 const { RangePicker } = DatePicker;
-export const getColumns = (handleDelete) => [
+export const getColumns = (handleDelete, handleApprove) => [
   {
     title: "头像",
     dataIndex: "avatar",
@@ -88,17 +88,41 @@ export const getColumns = (handleDelete) => [
     },
   },
   {
+    title: "审核状态",
+    dataIndex: "status",
+    key: "status",
+    render: (status) => {
+      if (status === 0) {
+        return <span style={{ color: '#FF9800' }}>待审核</span>;
+      } else if (status === 1) {
+        return <span style={{ color: '#4CAF50' }}>已审核</span>;
+      } else {
+        return <span>未知</span>;
+      }
+    },
+  },
+  {
     title: "操作",
     key: "operation",
     render: (_, record) => (
-      <Button
-        disabled={record.role.roleId === ROLE.ADMIN}
-        type="primary"
-        danger
-        onClick={() => handleDelete(record)}
-      >
-        删除
-      </Button>
+      <Flex gap={GAP.SMALL}>
+        {record.role.roleId !== ROLE.ADMIN && record.status === 0 && (
+          <Button
+            type="primary"
+            onClick={() => handleApprove(record, 1)}
+          >
+            审核通过
+          </Button>
+        )}
+        <Button
+          disabled={record.role.roleId === ROLE.ADMIN}
+          type="primary"
+          danger
+          onClick={() => handleDelete(record)}
+        >
+          删除
+        </Button>
+      </Flex>
     ),
   },
 ];

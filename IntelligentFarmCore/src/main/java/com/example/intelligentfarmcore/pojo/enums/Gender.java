@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Gender implements ICodeEnum {
-    NONE(0, "未知"),
     MALE(1, "男"),
     FEMALE(2, "女");
 
@@ -29,7 +28,12 @@ public enum Gender implements ICodeEnum {
 
     @JsonCreator
     public static Gender fromGenderId(Object input) {
-        return EnumUtils.fromValue(input, Gender.class, Gender::getGenderId);
+        try {
+            return EnumUtils.fromValue(input, Gender.class, Gender::getGenderId);
+        } catch (Exception e) {
+            // 如果输入无效，默认返回男
+            return MALE;
+        }
     }
 
     @Override

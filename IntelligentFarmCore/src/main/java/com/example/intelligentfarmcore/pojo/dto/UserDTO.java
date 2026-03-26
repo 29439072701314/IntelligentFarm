@@ -40,11 +40,14 @@ public class UserDTO {
     // 家属/护理人员绑定的所有老人ID列表
     private Set<Long> elderIds;
 
+    // 审核状态：0-待审核，1-已审核
+    private Integer status;
+
     public UserDTO() {
     }
 
     public UserDTO(Long userId, String userName, String phone, Role role, String avatar, Gender gender,
-            LocalDate birthday, RoomSummaryDTO room, HealthDeviceSummaryDTO healthDeviceSummary) {
+            LocalDate birthday, RoomSummaryDTO room, HealthDeviceSummaryDTO healthDeviceSummary, Integer status) {
         this.userId = userId;
         this.userName = userName;
         this.phone = phone;
@@ -54,6 +57,7 @@ public class UserDTO {
         this.birthday = birthday;
         this.room = room;
         this.healthDevice = healthDeviceSummary;
+        this.status = status;
     }
 
     public UserDTO(User user) {
@@ -64,6 +68,7 @@ public class UserDTO {
         this.avatar = user.getAvatar();
         this.gender = user.getGender();
         this.birthday = user.getBirthday();
+        this.status = user.getStatus();
         this.familyIds = user.getFamilyIds();
         this.caregiverIds = user.getCaregiverIds();
         this.elderIds = user.getElderIds();
@@ -169,5 +174,13 @@ public class UserDTO {
 
     public void setElderIds(Set<Long> elderIds) {
         this.elderIds = elderIds;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

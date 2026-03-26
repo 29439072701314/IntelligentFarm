@@ -86,22 +86,16 @@ export const GAP = {
 };
 // 角色设计
 export const ROLE = {
-  // 老人
-  ELDER: 0,
-  // 家属
-  FAMILY: 1,
-  // 监护人
-  CAREGIVER: 2,
   // 管理员
-  ADMIN: 3,
+  ADMIN: 0,
+  // 养殖员
+  FARMER: 1,
 };
 
 export const PERMISSION_OBJ = {};
 
 // 角色权限映射
 export const ROLE_PERMISSION = {
-  [ROLE.ELDER]: ["elder"],
-  [ROLE.FAMILY]: ["family"],
-  [ROLE.CAREGIVER]: ["caregiver"],
-  [ROLE.ADMIN]: ["elder", "family", "caregiver", "admin"],
+  [ROLE.ADMIN]: ["admin", "farmer"],
+  [ROLE.FARMER]: ["farmer"],
 };

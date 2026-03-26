@@ -20,7 +20,7 @@ public class UploadController {
     IUploadService uploadService;
 
     @PostMapping("/avatar")
-    public ResponseMessage<String> uploadAvatar(@RequestParam MultipartFile file) throws IOException {
+    public ResponseMessage uploadAvatar(@RequestParam MultipartFile file) throws IOException {
         return uploadService.uploadAvatar(file);
     }
 

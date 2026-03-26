@@ -26,7 +26,7 @@ export const getColumns = (handleEdit, handleDelete, handleDetail) => {
       key: "healthStatus",
       render: (text) => {
         let color = 'green';
-        if (text === '患病') color = 'red';
+        if (text === '不健康' || text === '患病') color = 'red';
         if (text === '治疗中') color = 'orange';
         if (text === '亚健康') color = 'yellow';
         return <Tag color={color}>{text}</Tag>;

@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 public interface IUploadService {
-    ResponseMessage<String> uploadAvatar(MultipartFile file) throws IOException;
+    ResponseMessage uploadAvatar(MultipartFile file) throws IOException;
 
     ResponseEntity<Resource> getAvatar(String filename) throws MalformedURLException, FileNotFoundException;
 }

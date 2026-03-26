@@ -42,8 +42,10 @@ public class UserController {
         if (user.getAvatar() == null || user.getAvatar().isEmpty()) {
             user.setAvatar("/upload/avatar/default.png");
         }
+        // 设置默认状态为待审核
+        user.setStatus(0);
         User addedUser = userService.addUser(user, true);
-        return ResponseMessage.success(addedUser, "注册成功");
+        return ResponseMessage.success(addedUser, "注册成功，等待管理员审核");
     }
 
     // 登录
@@ -57,6 +59,10 @@ public class UserController {
         // 校验密码是否正确
         if (!queryUser.getPassword().equals(user.getPassword())) {
             return ResponseMessage.error("密码错误");
+        }
+        // 校验用户是否已审核
+        if (queryUser.getStatus() == null || queryUser.getStatus() != 1) {
+            return ResponseMessage.error("账号尚未审核通过，请等待管理员审核");
         }
         // 生成JWT Token
         String token = JWTUtils.createToken(queryUser);
@@ -172,5 +178,19 @@ public class UserController {
     @PostMapping("/bindCaregiver")
     public ResponseMessage<String> bindCaregiver(@RequestBody BindCaregiverReq req) {
         return userService.bindCaregiver(req);
+    }
+
+    // 审核用户
+    @PostMapping("/approve")
+    public ResponseMessage<String> approveUser(@RequestBody Map<String, Object> map) {
+        Long userId = Long.parseLong(map.get("userId").toString());
+        Integer status = Integer.parseInt(map.get("status").toString());
+        User user = userService.getUser(userId);
+        if (user == null) {
+            return ResponseMessage.error("用户不存在");
+        }
+        user.setStatus(status);
+        userService.editUser(user);
+        return ResponseMessage.success(null, "审核成功");
     }
 }

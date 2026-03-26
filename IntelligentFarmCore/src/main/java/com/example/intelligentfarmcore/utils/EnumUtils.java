@@ -22,6 +22,10 @@ public class EnumUtils {
                 return enumValue;
             }
         }
+        // 如果没有找到匹配的枚举值，返回第一个枚举值作为默认值
+        if (enumClass.getEnumConstants().length > 0) {
+            return enumClass.getEnumConstants()[0];
+        }
         throw new IllegalArgumentException("无效的ID: " + value);
     }
     // 从枚举的ID获取枚举实例
@@ -30,6 +34,10 @@ public class EnumUtils {
             if (e.getId() == id) {
                 return e;
             }
+        }
+        // 如果没有找到匹配的枚举值，返回第一个枚举值作为默认值
+        if (enumClass.getEnumConstants().length > 0) {
+            return enumClass.getEnumConstants()[0];
         }
         throw new IllegalArgumentException("Invalid code: " + id + " for enum " + enumClass.getSimpleName());
     }

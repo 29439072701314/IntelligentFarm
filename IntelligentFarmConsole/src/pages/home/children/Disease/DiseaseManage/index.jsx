@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Modal, Form, message, Popconfirm, Card, Row, Col, Tag, Space, Spin, Select, DatePicker } from "antd";
+import { Table, Button, Input, Modal, Form, message, Popconfirm, Card, Row, Col, Tag, Space, Spin, Select, DatePicker, Tabs } from "antd";
 import { EditOutlined, PlusOutlined, MedicineBoxOutlined, CheckCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { apiGetDiseaseList, apiAddDiseaseRecord, apiEditDiseaseRecord, apiRecoverDiseaseRecord, apiGetDiseaseStatistics } from "@/services/diseaseApi";
-import { apiGetLivestockList } from "@/services/livestockApi";
+import { apiGetLivestockList, apiEditLivestock } from "@/services/livestockApi";
 import { apiGetFarmList } from "@/services/farmApi";
 import dayjs from "dayjs";
 import Content from "@/component/Content";
+
+const { TabPane } = Tabs;
 
 const { Column } = Table;
 const { TextArea } = Input;
@@ -14,7 +16,8 @@ const { RangePicker } = DatePicker;
 
 export default function DiseaseManage() {
   const [form] = Form.useForm();
-  const [dataSource, setDataSource] = useState([]);
+  const [currentDiseaseSource, setCurrentDiseaseSource] = useState([]);
+  const [historyDiseaseSource, setHistoryDiseaseSource] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentRecord, setCurrentRecord] = useState(null);
@@ -28,6 +31,7 @@ export default function DiseaseManage() {
   });
   const [checking, setChecking] = useState(false);
   const [farmList, setFarmList] = useState([]);
+  const [activeTab, setActiveTab] = useState('current');
 
   // 加载农场列表
   const loadFarmList = async () => {
@@ -39,34 +43,32 @@ export default function DiseaseManage() {
     }
   };
 
-  // 加载疾病记录列表
-  const loadDiseaseList = async () => {
+  // 加载当前疾病记录（治疗中）
+  const loadCurrentDiseaseList = async () => {
     setLoading(true);
     try {
-      const condition = {};
-      if (searchParams.livestockCode) {
-        condition.livestockCode = searchParams.livestockCode;
-      }
-      if (searchParams.diseaseName) {
-        condition.diseaseName = searchParams.diseaseName;
-      }
-      if (searchParams.farmId !== null && searchParams.farmId !== undefined) {
-        condition.farmId = searchParams.farmId;
-      }
-      if (searchParams.status) {
-        condition.status = searchParams.status;
-      }
-      if (searchParams.dateRange && searchParams.dateRange.length === 2) {
-        condition.startDate = searchParams.dateRange[0].format("YYYY-MM-DD");
-        condition.endDate = searchParams.dateRange[1].format("YYYY-MM-DD");
-      }
       const params = {
         pageNumber: 1,
         pageSize: 100,
-        condition: condition
+        condition: {
+          status: "治疗中"
+        }
       };
+      if (searchParams.livestockCode) {
+        params.condition.livestockCode = searchParams.livestockCode;
+      }
+      if (searchParams.diseaseName) {
+        params.condition.diseaseName = searchParams.diseaseName;
+      }
+      if (searchParams.farmId !== null) {
+        params.condition.farmId = searchParams.farmId;
+      }
+      if (searchParams.dateRange && searchParams.dateRange.length === 2) {
+        params.condition.startDate = searchParams.dateRange[0].format("YYYY-MM-DD");
+        params.condition.endDate = searchParams.dateRange[1].format("YYYY-MM-DD");
+      }
       const res = await apiGetDiseaseList(params);
-      setDataSource(res.data.content || res.data.list || []);
+      setCurrentDiseaseSource(res.data.content || res.data.list || []);
     } catch (error) {
       message.error(error.response?.data?.message || "获取疾病记录列表失败");
     } finally {
@@ -74,11 +76,50 @@ export default function DiseaseManage() {
     }
   };
 
+  // 加载历史疾病记录（已康复）
+  const loadHistoryDiseaseList = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        pageNumber: 1,
+        pageSize: 100,
+        condition: {
+          status: "已康复"
+        }
+      };
+      if (searchParams.livestockCode) {
+        params.condition.livestockCode = searchParams.livestockCode;
+      }
+      if (searchParams.diseaseName) {
+        params.condition.diseaseName = searchParams.diseaseName;
+      }
+      if (searchParams.farmId !== null) {
+        params.condition.farmId = searchParams.farmId;
+      }
+      if (searchParams.dateRange && searchParams.dateRange.length === 2) {
+        params.condition.startDate = searchParams.dateRange[0].format("YYYY-MM-DD");
+        params.condition.endDate = searchParams.dateRange[1].format("YYYY-MM-DD");
+      }
+      const res = await apiGetDiseaseList(params);
+      setHistoryDiseaseSource(res.data.content || res.data.list || []);
+    } catch (error) {
+      message.error(error.response?.data?.message || "获取疾病记录列表失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 加载疾病记录列表
+  const loadDiseaseList = async () => {
+    await loadCurrentDiseaseList();
+    await loadHistoryDiseaseList();
+  };
+
   // 加载统计数据
   const loadStatistics = async () => {
     try {
       const params = {};
-      if (searchParams.farmId) {
+      if (searchParams.farmId !== null) {
         params.farmId = searchParams.farmId;
       }
       const res = await apiGetDiseaseStatistics(params);
@@ -98,6 +139,7 @@ export default function DiseaseManage() {
   // 搜索条件变化时重新加载
   useEffect(() => {
     loadDiseaseList();
+    loadStatistics();
   }, [searchParams]);
 
   // 处理新增
@@ -120,6 +162,20 @@ export default function DiseaseManage() {
   // 处理标记康复
   const handleRecover = async (record) => {
     try {
+      // 获取所有牲畜，根据livestockCode找到对应的livestockId
+      const livestockRes = await apiGetLivestockList({ pageNumber: 1, pageSize: 1000 });
+      const livestockList = livestockRes.data.content || livestockRes.data.list || [];
+      const livestock = livestockList.find(item => item.livestockCode === record.livestockCode);
+      
+      if (livestock) {
+        // 更新牲畜健康状态为健康
+        await apiEditLivestock(livestock.livestockId, {
+          ...livestock,
+          healthStatus: "健康"
+        });
+      }
+      
+      // 标记疾病记录为康复
       await apiRecoverDiseaseRecord(record.id);
       message.success("标记康复成功");
       loadDiseaseList();
@@ -138,11 +194,7 @@ export default function DiseaseManage() {
       const livestockList = livestockRes.data.content || livestockRes.data.list || [];
       
       // 获取现有疾病记录，用于避免重复创建
-      const diseaseRes = await apiGetDiseaseList({ 
-        pageNumber: 1, 
-        pageSize: 1000,
-        condition: {} 
-      });
+      const diseaseRes = await apiGetDiseaseList({ pageNumber: 1, pageSize: 1000 });
       const existingDiseaseRecords = diseaseRes.data.content || diseaseRes.data.list || [];
       const existingLivestockCodes = existingDiseaseRecords
         .filter(record => record.status === "治疗中")
@@ -266,7 +318,7 @@ export default function DiseaseManage() {
           >
             <Option value={null}>全部农场</Option>
             {farmList.map(farm => (
-              <Option key={farm.id} value={farm.id}>{farm.farmName}</Option>
+              <Option key={farm.farmId} value={farm.farmId}>{farm.farmName}</Option>
             ))}
           </Select>
           <Input
@@ -281,16 +333,6 @@ export default function DiseaseManage() {
             onChange={(e) => setSearchParams({ ...searchParams, diseaseName: e.target.value })}
             style={{ width: 150 }}
           />
-          <Select
-            placeholder="状态"
-            value={searchParams.status}
-            onChange={(value) => setSearchParams({ ...searchParams, status: value })}
-            style={{ width: 120 }}
-          >
-            <Option value={null}>全部状态</Option>
-            <Option value="治疗中">治疗中</Option>
-            <Option value="已康复">已康复</Option>
-          </Select>
           <RangePicker
             placeholder={["开始日期", "结束日期"]}
             value={searchParams.dateRange}
@@ -320,51 +362,79 @@ export default function DiseaseManage() {
         </Space>
       </div>
 
-      {/* 表格 */}
-      <Table
-        dataSource={dataSource}
-        rowKey="id"
-        loading={loading}
-      >
-        <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
-        <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
-        <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
-        <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
-        <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
-        <Column
-          title="状态"
-          dataIndex="status"
-          key="status"
-          render={(text) => (
-            <Tag color={getStatusColor(text)}>{text}</Tag>
-          )}
-        />
-        <Column
-          title="操作"
-          key="action"
-          render={(text, record) => (
-            <div>
-              <Button
-                type="link"
-                icon={<EditOutlined />}
-                onClick={() => handleEdit(record)}
-                disabled={record.status === "已康复"}
-              >
-                编辑
-              </Button>
-              {record.status === "治疗中" && (
-                <Button
-                  type="link"
-                  icon={<MedicineBoxOutlined />}
-                  onClick={() => handleRecover(record)}
-                >
-                  标记康复
-                </Button>
+      {/* 标签页 */}
+      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+        {/* 当前疾病记录 */}
+        <TabPane tab="当前疾病记录" key="current">
+          <Table
+            dataSource={currentDiseaseSource}
+            rowKey="id"
+            loading={loading}
+          >
+            <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
+            <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
+            <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
+            <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
+            <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
+            <Column
+              title="状态"
+              dataIndex="status"
+              key="status"
+              render={(text) => (
+                <Tag color={getStatusColor(text)}>{text}</Tag>
               )}
-            </div>
-          )}
-        />
-      </Table>
+            />
+            <Column
+              title="操作"
+              key="action"
+              render={(text, record) => (
+                <div>
+                  <Button
+                    type="link"
+                    icon={<EditOutlined />}
+                    onClick={() => handleEdit(record)}
+                    disabled={record.status === "已康复"}
+                  >
+                    编辑
+                  </Button>
+                  {record.status === "治疗中" && (
+                    <Button
+                      type="link"
+                      icon={<MedicineBoxOutlined />}
+                      onClick={() => handleRecover(record)}
+                    >
+                      标记康复
+                    </Button>
+                  )}
+                </div>
+              )}
+            />
+          </Table>
+        </TabPane>
+
+        {/* 历史疾病记录 */}
+        <TabPane tab="历史疾病记录" key="history">
+          <Table
+            dataSource={historyDiseaseSource}
+            rowKey="id"
+            loading={loading}
+          >
+            <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
+            <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
+            <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
+            <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
+            <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
+            <Column
+              title="状态"
+              dataIndex="status"
+              key="status"
+              render={(text) => (
+                <Tag color={getStatusColor(text)}>{text}</Tag>
+              )}
+            />
+          </Table>
+        </TabPane>
+      </Tabs>
 
       {/* 新增/编辑弹窗 */}
       <Modal

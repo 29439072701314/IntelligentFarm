@@ -7,6 +7,7 @@ import { getColumns } from "./constant";
 import {
   apiDeleteUser,
   apiDeleteUserBatch,
+  apiApproveUser,
 } from "../../../../../services/userApi";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -57,6 +58,18 @@ export default function UserList() {
       },
     });
   };
+
+  // 审核用户
+  const handleApprove = async (record, status) => {
+    confirm({
+      title: "提示",
+      content: `确认审核 ${record.userName} 吗？`,
+      onOk: async () => {
+        await apiApproveUser({ userId: record.userId, status });
+        form.getData();
+      },
+    });
+  };
   return (
     <Content title="用户列表">
       <ProTable
@@ -78,7 +91,7 @@ export default function UserList() {
         form={form}
         api={apiGetUserList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleDelete)}
+        columns={getColumns(handleDelete, handleApprove)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加

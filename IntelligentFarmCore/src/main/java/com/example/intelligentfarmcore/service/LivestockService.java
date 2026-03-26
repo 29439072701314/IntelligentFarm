@@ -48,7 +48,7 @@ public class LivestockService implements ILivestockService {
             int end = Math.min(start + pageReq.getPageSize(), livestockList.size());
             List<Livestock> pageLivestock = livestockList.subList(start, end);
             List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(pageLivestock);
-
+            int totalPages = (livestockList.size() + pageReq.getPageSize() - 1) / pageReq.getPageSize();
             PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size());
             return ResponseMessage.success(pageRes);
         } else {

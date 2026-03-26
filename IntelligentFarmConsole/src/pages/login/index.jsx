@@ -52,7 +52,10 @@ export default function Login() {
 
   // 注册提交
   const onRegisterSubmit = async () => {
-    const res = await apiRegister(form.getFieldsValue());
+    const formData = form.getFieldsValue();
+    // 强制设置为养殖员角色
+    formData.role = ROLE.FARMER;
+    const res = await apiRegister(formData);
     if (res.code === HTTP_STATUS.OK) {
       onChangePageMode({
         phone: res.data.phone,
@@ -70,8 +73,8 @@ export default function Login() {
       labelCol: { span: 5 },
       onFinish: isLogin ? onLoginSubmit : onRegisterSubmit,
       initialValues: {
-        gender: GENDER.NONE,
-        role: ROLE.ELDER,
+        gender: GENDER.MALE,
+        role: ROLE.FARMER,
       },
     },
     items: [
@@ -176,14 +179,7 @@ export default function Login() {
         render: <GenderSelect />,
         isRender: !isLogin,
       },
-      {
-        props: {
-          label: "角色",
-          name: "role",
-        },
-        render: <RoleSelect />,
-        isRender: !isLogin,
-      },
+
       {
         props: {
           label: null,
@@ -215,7 +211,7 @@ export default function Login() {
   return (
     <div className={styles.background}>
       <div>
-        <h1 className={styles.systemTitle}>智慧养老管理系统</h1>
+        <h1 className={styles.systemTitle}>智能农场养殖系统</h1>
         <div className={styles.login}>
           <h1 className={styles.title}>
             {pageMode === PAGE_MODE.LOGIN ? "用户登录" : "用户注册"}

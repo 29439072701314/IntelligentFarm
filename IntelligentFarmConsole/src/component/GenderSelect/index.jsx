@@ -6,7 +6,7 @@ import { ManOutlined } from "@ant-design/icons";
 export default function GenderSelect(props) {
   return (
     <Select
-      defaultValue={GENDER.NONE}
+      defaultValue={GENDER.MALE}
       options={GENDER_LIST}
       prefix={<ManOutlined />}
       {...props}

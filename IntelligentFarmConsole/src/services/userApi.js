@@ -18,6 +18,9 @@ export const apiDeleteUserBatch = (data) => post("/user/deleteBatch", data);
 
 export const apiGetUserListByIds = (data) => post("/user/listByIds", data);
 
+// 审核用户
+export const apiApproveUser = (data) => post("/user/approve", data);
+
 // 绑定健康设备
 export const apiBindHealthDevice = (data) =>
   post("/user/bindHealthDevice", data);

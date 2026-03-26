@@ -31,8 +31,8 @@ export default function UserInfo(props) {
             avatar: "/upload/avatar/default.png",
             userName: "",
             phone: "",
-            gender: GENDER.NONE,
-            role: ROLE.ELDER,
+            gender: GENDER.MALE,
+            role: ROLE.FARMER,
             birthday: null,
           }
         : {

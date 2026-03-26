@@ -11,11 +11,28 @@ import { ROLE_PERMISSION } from "../constant";
  * @returns {boolean} 是否有权限
  */
 export const hasPermission = (role, permission) => {
-  if (!role || !ROLE_PERMISSION[role]) {
+  if (role === undefined || role === null) {
+    return false;
+  }
+  
+  // 处理不同类型的角色数据
+  let roleKey;
+  if (typeof role === 'object' && role.roleId !== undefined) {
+    // 如果是对象类型，取 roleId
+    roleKey = role.roleId;
+  } else if (typeof role === 'string') {
+    // 如果是字符串类型，转换为数字
+    roleKey = parseInt(role);
+  } else {
+    // 其他情况直接使用
+    roleKey = role;
+  }
+  
+  if (!ROLE_PERMISSION.hasOwnProperty(roleKey)) {
     return false;
   }
 
-  const userPermissions = ROLE_PERMISSION[role];
+  const userPermissions = ROLE_PERMISSION[roleKey];
 
   // 如果permission是数组，检查用户是否有任一权限
   if (Array.isArray(permission)) {

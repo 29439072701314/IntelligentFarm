@@ -6,10 +6,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Role implements ICodeEnum{
-    ELDER(0, "老人"),
-    FAMILY(1, "家属"),
-    CAREGIVER(2,"护理人员"),
-    ADMIN(3, "管理员");
+    ADMIN(0, "管理员"),
+    FARMER(1, "养殖员");
 
     private final int roleId;
     private final String roleName;
