@@ -3,13 +3,10 @@ package com.example.intelligentfarmcore.service.interfaces;
 import com.example.intelligentfarmcore.pojo.dto.UserDTO;
 import com.example.intelligentfarmcore.pojo.model.ResponseMessage;
 import com.example.intelligentfarmcore.pojo.entity.User;
-import com.example.intelligentfarmcore.pojo.request.BindCaregiverReq;
-import com.example.intelligentfarmcore.pojo.request.BindFamilyReq;
 import com.example.intelligentfarmcore.pojo.request.PageReq;
 import com.example.intelligentfarmcore.pojo.response.PageRes;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IUserService {
     /**
@@ -81,28 +78,4 @@ public interface IUserService {
      * @return 用户DTO列表
      */
     ResponseMessage<List<UserDTO>> getUserListByIds(List<Long> userIds);
-
-    /**
-     * 绑定用户健康设备
-     * 
-     * @param map 包含用户ID和设备ID的映射
-     * @return 响应消息
-     */
-    ResponseMessage<String> bindHealthDevice(Map<String, Object> map);
-
-    /**
-     * 绑定家属
-     * 
-     * @param map 包含用户ID和家属ID的映射
-     * @return 响应消息
-     */
-    ResponseMessage<String> bindFamily(BindFamilyReq req);
-
-    /**
-     * 绑定护理人员
-     * 
-     * @param map 包含用户ID和护理人员ID的映射
-     * @return 响应消息
-     */
-    ResponseMessage<String> bindCaregiver(BindCaregiverReq req);
 }

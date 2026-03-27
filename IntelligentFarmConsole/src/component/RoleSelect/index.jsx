@@ -4,14 +4,17 @@ import { ROLE } from "../../constant";
 import { Select, Tag } from "antd";
 import { IdcardOutlined } from "@ant-design/icons";
 
-export default function RoleSelect(props) {
-  const { needAdmin = false } = props;
+export default function RoleSelect({ needAdmin = false, value, onChange, style, className, disabled }) {
   return (
     <Select
       defaultValue={ROLE.FARMER}
       options={needAdmin ? ROLE_LIST : ROLE_LIST_NOADMIN}
       prefix={<IdcardOutlined />}
-      {...props}
+      value={value}
+      onChange={onChange}
+      style={style}
+      className={className}
+      disabled={disabled}
     />
   );
 }

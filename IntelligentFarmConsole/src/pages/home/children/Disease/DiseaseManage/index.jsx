@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Modal, Form, message, Popconfirm, Card, Row, Col, Tag, Space, Spin, Select, DatePicker, Tabs } from "antd";
+import { Table, Button, Input, Modal, Form, message, Popconfirm, Card, Row, Col, Tag, Space, Spin, Select, DatePicker, Tabs, App } from "antd";
 import { EditOutlined, PlusOutlined, MedicineBoxOutlined, CheckCircleOutlined, SearchOutlined } from "@ant-design/icons";
 import { apiGetDiseaseList, apiAddDiseaseRecord, apiEditDiseaseRecord, apiRecoverDiseaseRecord, apiGetDiseaseStatistics } from "@/services/diseaseApi";
 import { apiGetLivestockList, apiEditLivestock } from "@/services/livestockApi";
 import { apiGetFarmList } from "@/services/farmApi";
 import dayjs from "dayjs";
 import Content from "@/component/Content";
-
-const { TabPane } = Tabs;
 
 const { Column } = Table;
 const { TextArea } = Input;
@@ -25,13 +23,93 @@ export default function DiseaseManage() {
   const [searchParams, setSearchParams] = useState({ 
     livestockCode: "", 
     diseaseName: "", 
-    farmId: null,
+    farmId: "",
     status: null,
     dateRange: null
   });
   const [checking, setChecking] = useState(false);
   const [farmList, setFarmList] = useState([]);
   const [activeTab, setActiveTab] = useState('current');
+  const { message } = App.useApp();
+
+  // Tabs items配置
+  const tabsItems = [
+    {
+      key: 'current',
+      label: '当前疾病记录',
+      children: (
+        <Table
+          dataSource={currentDiseaseSource}
+          rowKey="id"
+          loading={loading}
+        >
+          <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
+          <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
+          <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
+          <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
+          <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
+          <Column
+            title="状态"
+            dataIndex="status"
+            key="status"
+            render={(text) => (
+              <Tag color={getStatusColor(text)}>{text}</Tag>
+            )}
+          />
+          <Column
+            title="操作"
+            key="action"
+            render={(text, record) => (
+              <div>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => handleEdit(record)}
+                  disabled={record.status === "已康复"}
+                >
+                  编辑
+                </Button>
+                {record.status === "治疗中" && (
+                  <Button
+                    type="link"
+                    icon={<MedicineBoxOutlined />}
+                    onClick={() => handleRecover(record)}
+                  >
+                    标记康复
+                  </Button>
+                )}
+              </div>
+            )}
+          />
+        </Table>
+      ),
+    },
+    {
+      key: 'history',
+      label: '历史疾病记录',
+      children: (
+        <Table
+          dataSource={historyDiseaseSource}
+          rowKey="id"
+          loading={loading}
+        >
+          <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
+          <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
+          <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
+          <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
+          <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
+          <Column
+            title="状态"
+            dataIndex="status"
+            key="status"
+            render={(text) => (
+              <Tag color={getStatusColor(text)}>{text}</Tag>
+            )}
+          />
+        </Table>
+      ),
+    },
+  ];
 
   // 加载农场列表
   const loadFarmList = async () => {
@@ -60,7 +138,7 @@ export default function DiseaseManage() {
       if (searchParams.diseaseName) {
         params.condition.diseaseName = searchParams.diseaseName;
       }
-      if (searchParams.farmId !== null) {
+      if (searchParams.farmId !== null && searchParams.farmId !== "") {
         params.condition.farmId = searchParams.farmId;
       }
       if (searchParams.dateRange && searchParams.dateRange.length === 2) {
@@ -93,7 +171,7 @@ export default function DiseaseManage() {
       if (searchParams.diseaseName) {
         params.condition.diseaseName = searchParams.diseaseName;
       }
-      if (searchParams.farmId !== null) {
+      if (searchParams.farmId !== null && searchParams.farmId !== "") {
         params.condition.farmId = searchParams.farmId;
       }
       if (searchParams.dateRange && searchParams.dateRange.length === 2) {
@@ -119,7 +197,7 @@ export default function DiseaseManage() {
   const loadStatistics = async () => {
     try {
       const params = {};
-      if (searchParams.farmId !== null) {
+      if (searchParams.farmId !== null && searchParams.farmId !== "") {
         params.farmId = searchParams.farmId;
       }
       const res = await apiGetDiseaseStatistics(params);
@@ -316,7 +394,7 @@ export default function DiseaseManage() {
             onChange={(value) => setSearchParams({ ...searchParams, farmId: value })}
             style={{ width: 150 }}
           >
-            <Option value={null}>全部农场</Option>
+            <Option value="">全部农场</Option>
             {farmList.map(farm => (
               <Option key={farm.farmId} value={farm.farmId}>{farm.farmName}</Option>
             ))}
@@ -363,78 +441,7 @@ export default function DiseaseManage() {
       </div>
 
       {/* 标签页 */}
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        {/* 当前疾病记录 */}
-        <TabPane tab="当前疾病记录" key="current">
-          <Table
-            dataSource={currentDiseaseSource}
-            rowKey="id"
-            loading={loading}
-          >
-            <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
-            <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
-            <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
-            <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
-            <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
-            <Column
-              title="状态"
-              dataIndex="status"
-              key="status"
-              render={(text) => (
-                <Tag color={getStatusColor(text)}>{text}</Tag>
-              )}
-            />
-            <Column
-              title="操作"
-              key="action"
-              render={(text, record) => (
-                <div>
-                  <Button
-                    type="link"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEdit(record)}
-                    disabled={record.status === "已康复"}
-                  >
-                    编辑
-                  </Button>
-                  {record.status === "治疗中" && (
-                    <Button
-                      type="link"
-                      icon={<MedicineBoxOutlined />}
-                      onClick={() => handleRecover(record)}
-                    >
-                      标记康复
-                    </Button>
-                  )}
-                </div>
-              )}
-            />
-          </Table>
-        </TabPane>
-
-        {/* 历史疾病记录 */}
-        <TabPane tab="历史疾病记录" key="history">
-          <Table
-            dataSource={historyDiseaseSource}
-            rowKey="id"
-            loading={loading}
-          >
-            <Column title="疾病名称" dataIndex="diseaseName" key="diseaseName" />
-            <Column title="牲畜编号" dataIndex="livestockCode" key="livestockCode" />
-            <Column title="发病日期" dataIndex="onsetDate" key="onsetDate" />
-            <Column title="症状" dataIndex="symptoms" key="symptoms" ellipsis />
-            <Column title="治疗措施" dataIndex="treatment" key="treatment" ellipsis />
-            <Column
-              title="状态"
-              dataIndex="status"
-              key="status"
-              render={(text) => (
-                <Tag color={getStatusColor(text)}>{text}</Tag>
-              )}
-            />
-          </Table>
-        </TabPane>
-      </Tabs>
+      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabsItems} />
 
       {/* 新增/编辑弹窗 */}
       <Modal

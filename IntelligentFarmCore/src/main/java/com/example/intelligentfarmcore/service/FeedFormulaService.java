@@ -31,6 +31,9 @@ public class FeedFormulaService implements IFeedFormulaService {
     @Autowired
     private FeedFormulaMapper feedFormulaMapper;
 
+    @Autowired
+    private WarningService warningService;
+
     @Override
     public ResponseMessage<PageRes<FeedFormulaDTO>> getFormulaList(PageReq pageReq) {
         Pageable pageable = PageRequest.of(pageReq.getPageNumber() - 1, pageReq.getPageSize());
@@ -130,13 +133,19 @@ public class FeedFormulaService implements IFeedFormulaService {
         if (formula == null) {
             return ResponseMessage.error("配方不存在");
         }
+        // 保存旧库存
+        Double oldStock = formula.getStock();
         // 更新库存
         formula.setStock(stock);
         FeedFormula updatedFormula = feedFormulaDao.save(formula);
-        // 这里可以添加库存预警逻辑，生成告警
-        // if (stock < formula.getThreshold()) {
-        //     // 生成告警
-        // }
+        // 检查库存是否低于阈值
+        if (stock < formula.getThreshold()) {
+            // 生成告警
+            warningService.generateWarning("饲料", formula.getId().toString(), "配方" + formula.getName() + "库存低于阈值", "低");
+        } else if (oldStock < formula.getThreshold() && stock >= formula.getThreshold()) {
+            // 库存恢复正常，消除告警
+            warningService.eliminateFeedWarning(formula.getId().toString());
+        }
         return ResponseMessage.success(updatedFormula, "更新库存成功");
     }
 }

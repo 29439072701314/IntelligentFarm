@@ -36,30 +36,53 @@ public class DiseaseRecordService implements IDiseaseRecordService {
         
         // 如果有农场ID，根据农场ID查询
         if (pageReq.getCondition() != null && pageReq.getCondition().containsKey("farmId")) {
-            Long farmId = Long.valueOf(pageReq.getCondition().get("farmId").toString());
-            
-            // 获取该农场下的所有牲畜
-            List<Livestock> livestockList = livestockDao.findByFarmId(farmId);
-            if (livestockList.isEmpty()) {
-                // 农场下没有牲畜，返回空列表
-                PageRes<DiseaseRecordDTO> pageRes = new PageRes<>(List.of(), 0);
-                return ResponseMessage.success(pageRes);
+            Object farmIdObj = pageReq.getCondition().get("farmId");
+            if (farmIdObj != null) {
+                String farmIdStr = farmIdObj.toString();
+                if (!farmIdStr.isEmpty()) {
+                    try {
+                        Long farmId = Long.valueOf(farmIdStr);
+                        
+                        // 获取该农场下的所有牲畜
+                        List<Livestock> livestockList = livestockDao.findByFarmId(farmId);
+                        if (livestockList.isEmpty()) {
+                            // 农场下没有牲畜，返回空列表
+                            PageRes<DiseaseRecordDTO> pageRes = new PageRes<>(List.of(), 0);
+                            return ResponseMessage.success(pageRes);
+                        }
+                        
+                        // 获取这些牲畜的编号列表
+                        List<String> livestockCodes = livestockList.stream()
+                                .map(Livestock::getLivestockCode)
+                                .filter(code -> code != null && !code.isEmpty())
+                                .collect(Collectors.toList());
+                        
+                        if (livestockCodes.isEmpty()) {
+                            // 没有有效的牲畜编号，返回空列表
+                            PageRes<DiseaseRecordDTO> pageRes = new PageRes<>(List.of(), 0);
+                            return ResponseMessage.success(pageRes);
+                        }
+                        
+                        // 根据牲畜编号查询疾病记录
+                        diseaseRecords = diseaseRecordDao.findByLivestockCodeIn(livestockCodes);
+                    } catch (NumberFormatException e) {
+                        // 农场ID格式错误，查询所有
+                        Iterable<DiseaseRecord> iterable = diseaseRecordDao.findAll();
+                        diseaseRecords = new java.util.ArrayList<>();
+                        iterable.forEach(diseaseRecords::add);
+                    }
+                } else {
+                    // 农场ID为空，查询所有
+                    Iterable<DiseaseRecord> iterable = diseaseRecordDao.findAll();
+                    diseaseRecords = new java.util.ArrayList<>();
+                    iterable.forEach(diseaseRecords::add);
+                }
+            } else {
+                // 农场ID为null，查询所有
+                Iterable<DiseaseRecord> iterable = diseaseRecordDao.findAll();
+                diseaseRecords = new java.util.ArrayList<>();
+                iterable.forEach(diseaseRecords::add);
             }
-            
-            // 获取这些牲畜的编号列表
-            List<String> livestockCodes = livestockList.stream()
-                    .map(Livestock::getLivestockCode)
-                    .filter(code -> code != null && !code.isEmpty())
-                    .collect(Collectors.toList());
-            
-            if (livestockCodes.isEmpty()) {
-                // 没有有效的牲畜编号，返回空列表
-                PageRes<DiseaseRecordDTO> pageRes = new PageRes<>(List.of(), 0);
-                return ResponseMessage.success(pageRes);
-            }
-            
-            // 根据牲畜编号查询疾病记录
-            diseaseRecords = diseaseRecordDao.findByLivestockCodeIn(livestockCodes);
         } else {
             // 否则查询所有
             Iterable<DiseaseRecord> iterable = diseaseRecordDao.findAll();

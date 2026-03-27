@@ -5,7 +5,7 @@ export const apiGetFormulaList = (data) => get("/api/feed/formula/list", data);
 export const apiAddFormula = (data) => post("/api/feed/formula", data);
 export const apiEditFormula = (id, data) => put(`/api/feed/formula/${id}`, data);
 export const apiDeleteFormula = (id) => del(`/api/feed/formula/${id}`);
-export const apiUpdateStock = (id, stock) => put(`/api/feed/formula/${id}/stock`, { stock });
+export const apiUpdateStock = (id, stock) => put(`/api/feed/formula/${id}/stock?stock=${stock}`);
 
 // 计划相关API
 export const apiGetPlanList = (data) => get("/api/feed/plan/list", data);

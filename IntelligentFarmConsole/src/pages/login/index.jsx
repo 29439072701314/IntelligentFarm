@@ -84,11 +84,11 @@ export default function Login() {
           label: "手机号",
           rules: [
             {
-              validator: (_, value, callback) => {
+              validator: (_, value) => {
                 if (!verifyPhone(value)) {
-                  callback("请输入正确的手机号");
+                  return Promise.reject(new Error("请输入正确的手机号"));
                 }
-                callback();
+                return Promise.resolve();
               },
               message: "请输入正确的手机号",
             },
@@ -102,11 +102,11 @@ export default function Login() {
           name: "userName",
           rules: [
             {
-              validator: (_, value, callback) => {
+              validator: (_, value) => {
                 if (!value && !isLogin) {
-                  callback("请输入用户名");
+                  return Promise.reject(new Error("请输入用户名"));
                 }
-                callback();
+                return Promise.resolve();
               },
               message: "请输入用户名",
             },
@@ -121,15 +121,17 @@ export default function Login() {
           name: "password",
           rules: [
             {
-              validator: (_, value, callback) => {
+              validator: (_, value) => {
                 if (!value) {
-                  callback("请输入密码");
+                  return Promise.reject(new Error("请输入密码"));
                 }
-                isLogin && callback();
+                if (isLogin) {
+                  return Promise.resolve();
+                }
                 if (!verifyGeneralFormat(value)) {
-                  callback("密码格式错误(8-16位数字或字母组成)");
+                  return Promise.reject(new Error("密码格式错误(8-16位数字或字母组成)"));
                 }
-                callback();
+                return Promise.resolve();
               },
             },
           ],
@@ -148,16 +150,18 @@ export default function Login() {
           label: "确认密码",
           rules: [
             {
-              validator: (_, value, callback) => {
-                isLogin && callback();
+              validator: (_, value) => {
+                if (isLogin) {
+                  return Promise.resolve();
+                }
                 if (!value) {
-                  callback("请确认密码");
+                  return Promise.reject(new Error("请确认密码"));
                 }
                 const password = form.getFieldValue("password");
                 if (value !== password) {
-                  callback("两次输入密码不一致");
+                  return Promise.reject(new Error("两次输入密码不一致"));
                 }
-                callback();
+                return Promise.resolve();
               },
             },
           ],

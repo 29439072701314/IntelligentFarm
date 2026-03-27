@@ -6,7 +6,6 @@ import GenderSelect from "@/component/GenderSelect";
 import RoleSelect from "@/component/RoleSelect";
 import RoleTag from "../../../../../component/RoleTag";
 import GenderTag from "../../../../../component/GenderTag";
-import RoomNumberTag from "../../../../../component/RoomNumberTag";
 import { GAP, ROLE } from "../../../../../constant";
 const { RangePicker } = DatePicker;
 export const getColumns = (handleDelete, handleApprove) => [
@@ -18,9 +17,6 @@ export const getColumns = (handleDelete, handleApprove) => [
     render: (url, record) => (
       <Flex align="center" gap={GAP.SMALL}>
         <Avatar src={BASE_URL + url} />
-        {record?.room?.roomNumber && (
-          <RoomNumberTag roomNumber={record?.room?.roomNumber} />
-        )}
       </Flex>
     ),
     formItemProps: {

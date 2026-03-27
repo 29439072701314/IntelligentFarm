@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Input, Modal, Form, message, Popconfirm, Space } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { Table, Button, Input, Modal, Form, message, Popconfirm, Space, Tag } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
 import { apiGetFormulaList, apiAddFormula, apiEditFormula, apiDeleteFormula, apiUpdateStock } from "@/services/feedApi";
 
 const { Column } = Table;
@@ -106,6 +106,11 @@ export default function FeedFormulaList() {
     return record.stock < record.threshold ? "warning-row" : "";
   };
 
+  // 库存单元格样式
+  const getStockStyle = (record) => {
+    return record.stock < record.threshold ? { color: 'red', fontWeight: 'bold' } : {};
+  };
+
   return (
     <div>
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
@@ -134,16 +139,19 @@ export default function FeedFormulaList() {
           render={(text, record) => (
             <Space>
               <Input
-                type="number"
-                min={0}
-                step={0.1}
-                style={{ width: 60 }}
+                type="text"
+                style={{ width: 60, ...getStockStyle(record) }}
                 value={editingStock[record.id] !== undefined ? editingStock[record.id] : text}
                 onChange={(e) => handleStockChange(e, record.id)}
                 onFocus={() => handleStockEditStart(record)}
                 onBlur={() => handleStockEditEnd(record)}
               />
               <span>吨</span>
+              {record.stock < record.threshold && (
+                <Tag color="error" icon={<WarningOutlined />}>
+                  库存不足
+                </Tag>
+              )}
             </Space>
           )}
         />

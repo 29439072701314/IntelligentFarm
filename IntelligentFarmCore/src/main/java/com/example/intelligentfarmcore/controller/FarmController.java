@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/farm")
+@RequestMapping("/farm")
 public class FarmController {
 
     @Autowired

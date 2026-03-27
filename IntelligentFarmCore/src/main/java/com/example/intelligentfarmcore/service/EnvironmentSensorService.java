@@ -17,9 +17,23 @@ public class EnvironmentSensorService implements IEnvironmentSensorService {
     @Autowired
     private EnvironmentSensorDao environmentSensorDao;
 
+    @Autowired
+    private WarningService warningService;
+
     @Override
     public void addEnvironmentSensor(EnvironmentData environmentData) {
         environmentSensorDao.save(environmentData);
+        
+        // 检查温度是否超过28℃，如果是，生成环境告警
+        if (environmentData.getTemperature() != null && environmentData.getTemperature() > 28) {
+            String deviceId = environmentData.getDeviceId().toString();
+            String details = "温度超过28℃，当前温度：" + environmentData.getTemperature() + "℃";
+            warningService.generateWarning("环境", deviceId, details, "高");
+        } else if (environmentData.getTemperature() != null && environmentData.getTemperature() <= 28) {
+            // 温度恢复正常，消除告警
+            String deviceId = environmentData.getDeviceId().toString();
+            warningService.eliminateEnvironmentWarning(deviceId);
+        }
     }
 
     @Override

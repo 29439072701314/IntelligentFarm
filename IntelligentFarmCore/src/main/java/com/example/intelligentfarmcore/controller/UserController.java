@@ -4,8 +4,6 @@ import com.example.intelligentfarmcore.mapper.UserMapper;
 import com.example.intelligentfarmcore.pojo.dto.UserDTO;
 import com.example.intelligentfarmcore.pojo.model.ResponseMessage;
 import com.example.intelligentfarmcore.pojo.entity.User;
-import com.example.intelligentfarmcore.pojo.request.BindCaregiverReq;
-import com.example.intelligentfarmcore.pojo.request.BindFamilyReq;
 import com.example.intelligentfarmcore.pojo.request.ChangePasswordReq;
 import com.example.intelligentfarmcore.pojo.request.DeleteBatchReq;
 import com.example.intelligentfarmcore.pojo.request.PageReq;
@@ -160,24 +158,6 @@ public class UserController {
         }
         userService.deleteBatch(userIds);
         return ResponseMessage.success(null, "批量删除成功");
-    }
-
-    // 绑定用户健康设备
-    @PostMapping("/bindHealthDevice")
-    public ResponseMessage<String> bindHealthDevice(@RequestBody Map<String, Object> map) {
-        return userService.bindHealthDevice(map);
-    }
-
-    // 绑定家属
-    @PostMapping("/bindFamily")
-    public ResponseMessage<String> bindFamily(@RequestBody BindFamilyReq req) {
-        return userService.bindFamily(req);
-    }
-
-    // 绑定护理人员
-    @PostMapping("/bindCaregiver")
-    public ResponseMessage<String> bindCaregiver(@RequestBody BindCaregiverReq req) {
-        return userService.bindCaregiver(req);
     }
 
     // 审核用户

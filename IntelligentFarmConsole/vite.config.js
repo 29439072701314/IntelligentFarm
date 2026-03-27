@@ -24,4 +24,8 @@ export default defineConfig({
       },
     },
   },
+  // 解决sockjs-client的兼容性问题
+  define: {
+    global: "window"
+  },
 });

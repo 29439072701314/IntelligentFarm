@@ -4,11 +4,7 @@ import com.example.intelligentfarmcore.pojo.enums.Gender;
 import com.example.intelligentfarmcore.pojo.enums.Role;
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import java.time.LocalDate;
-import java.util.Set;
 
 @Table(name = "tb_user")
 @Entity
@@ -47,40 +43,9 @@ public class User {
     @Column(name = "birthday")
     private LocalDate birthday;
 
-    @ManyToOne()
-    @JoinColumn(name = "room_id")
-    private Room room;
-
-    @OneToOne()
-    @JoinColumn(name = "health_device_id", unique = true)
-    private HealthDevice healthDevice;
-
-    // 老人绑定的所有家属ID列表
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "family_ids", columnDefinition = "json")
-    private Set<Long> familyIds;
-
-    // 老人绑定的所有护理人员ID列表
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "caregiver_ids", columnDefinition = "json")
-    private Set<Long> caregiverIds;
-
-    // 家属/护理人员绑定的所有老人ID列表
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "elder_ids", columnDefinition = "json")
-    private Set<Long> elderIds;
-
     // 审核状态：0-待审核，1-已审核
     @Column(name = "status")
     private Integer status;
-
-    public HealthDevice getHealthDevice() {
-        return healthDevice;
-    }
-
-    public void setHealthDevice(HealthDevice healthDevice) {
-        this.healthDevice = healthDevice;
-    }
 
     public Long getUserId() {
         return userId;
@@ -144,38 +109,6 @@ public class User {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
-    }
-
-    public Room getRoom() {
-        return room;
-    }
-
-    public void setRoom(Room room) {
-        this.room = room;
-    }
-
-    public Set<Long> getFamilyIds() {
-        return familyIds;
-    }
-
-    public void setFamilyIds(Set<Long> familyIds) {
-        this.familyIds = familyIds;
-    }
-
-    public Set<Long> getCaregiverIds() {
-        return caregiverIds;
-    }
-
-    public void setCaregiverIds(Set<Long> caregiverIds) {
-        this.caregiverIds = caregiverIds;
-    }
-
-    public Set<Long> getElderIds() {
-        return elderIds;
-    }
-
-    public void setElderIds(Set<Long> elderIds) {
-        this.elderIds = elderIds;
     }
 
     public Integer getStatus() {

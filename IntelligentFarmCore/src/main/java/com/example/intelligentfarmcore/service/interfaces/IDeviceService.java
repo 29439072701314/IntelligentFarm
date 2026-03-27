@@ -31,4 +31,29 @@ public interface IDeviceService {
      * @return 所有设备列表
      */
     ResponseMessage<List<DeviceDTO>> getAllDevice();
+
+    /**
+     * 绑定设备到农场
+     * 
+     * @param deviceId 设备ID
+     * @param farmId 农场ID
+     * @return 绑定结果
+     */
+    ResponseMessage<String> bindDeviceToFarm(Long deviceId, Long farmId);
+
+    /**
+     * 解绑设备与农场
+     * 
+     * @param deviceId 设备ID
+     * @return 解绑结果
+     */
+    ResponseMessage<String> unbindDeviceFromFarm(Long deviceId);
+
+    /**
+     * 根据农场ID查询设备列表
+     * 
+     * @param farmId 农场ID
+     * @return 设备列表
+     */
+    ResponseMessage<List<DeviceDTO>> getDevicesByFarmId(Long farmId);
 }

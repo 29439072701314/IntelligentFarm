@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, App as AntdApp } from "antd";
 import { RouterProvider } from "react-router";
 import router, { createDynamicRouter } from "./router";
 // import styles from './App.module.less'
@@ -9,17 +9,18 @@ import { COLORS } from "./constant";
 import { useSelector } from "react-redux";
 function App() {
   const user = useSelector((state) => state.user);
-  const roleId = user.role.roleId;
-  console.log(user.role.roleId);
+  const roleId = user.role?.roleId;
+  console.log('Role ID:', roleId);
 
   // 使用useMemo来缓存路由配置，避免不必要的重新创建
   const currentRouter = useMemo(() => {
-    if (roleId != undefined) {
-      console.log(roleId);
+    if (roleId !== undefined && roleId !== null) {
+      console.log('Creating dynamic router for role:', roleId);
       const dynamicrouter = createDynamicRouter(roleId);
-      console.log(dynamicrouter);
+      console.log('Dynamic router created:', dynamicrouter);
       return dynamicrouter;
     }
+    console.log('Using default router');
     return router;
   }, [roleId]); // roleId变化时重新创建路由
 
@@ -94,7 +95,9 @@ function App() {
           },
         }}
       >
-        <RouterProvider router={currentRouter} />
+        <AntdApp>
+          <RouterProvider router={currentRouter} />
+        </AntdApp>
       </ConfigProvider>
     </>
   );

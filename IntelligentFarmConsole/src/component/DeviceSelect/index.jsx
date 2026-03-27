@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { Select, Space } from "antd";
 import { apiGetAllDevice } from "@/services/deviceApi";
 import DeviceNameTag from "../DeviceNameTag";
-import RoomNumberTag from "../RoomNumberTag";
+import FarmTag from "../FarmTag";
 
 export default function DeviceSelect(props) {
   const {
     onChange,
     value,
-    isFilterRoomDevice = true,
+    isFilterFarmDevice = true,
     showFirstDevice = false,
-    // 是否显示绑定的房间号
-    showRoom = false,
+    // 是否显示绑定的农场
+    showFarm = false,
   } = props;
   const [deviceList, setDeviceList] = useState([]);
   useEffect(() => {
@@ -21,12 +21,12 @@ export default function DeviceSelect(props) {
         setDeviceList([]);
         return;
       }
-      const finalyDeviceList = isFilterRoomDevice
-        ? data.filter((item) => item.room == null || item.deviceId === value)
+      const finalDeviceList = isFilterFarmDevice
+        ? data.filter((item) => item.farm == null || item.deviceId === value)
         : data;
-      setDeviceList(finalyDeviceList);
-      if (showFirstDevice && finalyDeviceList.length > 0) {
-        onChange(finalyDeviceList[0].deviceId);
+      setDeviceList(finalDeviceList);
+      if (showFirstDevice && finalDeviceList.length > 0) {
+        onChange(finalDeviceList[0].deviceId);
       }
     };
     getData();
@@ -41,7 +41,6 @@ export default function DeviceSelect(props) {
         onChange={onChange}
         value={value}
         style={{ width: 200 }}
-        {...props}
       >
         {deviceList.map((item) => (
           <Select.Option key={item.deviceId} value={item.deviceId}>
@@ -49,14 +48,14 @@ export default function DeviceSelect(props) {
           </Select.Option>
         ))}
       </Select>
-      {showRoom && (
-        <RoomNumberTag
-          roomNumber={
-            deviceList.find((item) => item.deviceId === value)?.room
-              ?.roomNumber || "未绑定"
+      {showFarm && (
+        <FarmTag
+          farmName={
+            deviceList.find((item) => item.deviceId === value)?.farm
+              ?.farmName || "未绑定"
           }
           color={
-            deviceList.find((item) => item.deviceId === value)?.room
+            deviceList.find((item) => item.deviceId === value)?.farm
               ? "blue"
               : "orange"
           }

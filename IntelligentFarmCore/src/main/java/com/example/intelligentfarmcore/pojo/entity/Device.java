@@ -37,11 +37,8 @@ public class Device {
     @Column(name = "farm_id")
     private Long farmId;
 
-    @OneToOne(mappedBy = "device")
-    private Room room;
-
     // 关联的农场
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "farm_id", insertable = false, updatable = false)
     private Farm farm;
 
@@ -87,14 +84,6 @@ public class Device {
 
     public void setFarm(Farm farm) {
         this.farm = farm;
-    }
-
-    public Room getRoom() {
-        return room;
-    }
-
-    public void setRoom(Room room) {
-        this.room = room;
     }
 
     public Long getTime() {

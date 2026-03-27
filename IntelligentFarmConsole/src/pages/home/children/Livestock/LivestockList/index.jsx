@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProTable from "@/component/ProTable";
 import Content from "@/component/Content";
-import { Form, Modal, Button, message } from "antd";
+import { Form, Modal, Button, App } from "antd";
 import { getColumns } from "./constant";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import LivestockEditModal from "./component/LivestockEditModal";
@@ -19,6 +19,7 @@ export default function LivestockList() {
   const [currentLivestock, setCurrentLivestock] = useState(null);
   const location = useLocation();
   const [farmId, setFarmId] = useState(null);
+  const { message } = App.useApp();
 
   useEffect(() => {
     // 从URL参数中获取farmId

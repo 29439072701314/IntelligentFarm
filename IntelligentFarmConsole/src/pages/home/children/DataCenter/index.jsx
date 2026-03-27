@@ -53,9 +53,9 @@ export default function DataCenter() {
           <Form.Item name="deviceId" label="设备名称">
             <DeviceSelect
               onChange={getData}
-              isFilterRoomDevice={false}
+              isFilterFarmDevice={false}
               showFirstDevice
-              showRoom
+              showFarm
               allowClear={false}
             />
           </Form.Item>

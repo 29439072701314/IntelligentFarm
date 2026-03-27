@@ -53,7 +53,7 @@ public class Livestock {
     private String livestockType;
 
     // 关联的农场
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "farm_id", insertable = false, updatable = false)
     private Farm farm;
 

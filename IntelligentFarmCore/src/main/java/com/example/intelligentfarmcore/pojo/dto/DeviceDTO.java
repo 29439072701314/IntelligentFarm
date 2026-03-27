@@ -22,8 +22,8 @@ public class DeviceDTO {
     // 气体浓度
     private Integer gasConcentration;
 
-    // 关联的房间信息（只包含基本字段，避免循环引用）
-    private RoomSummaryDTO room;
+    // 关联的农场
+    private FarmSummaryDTO farm;
 
     // 构造方法
     public DeviceDTO() {
@@ -78,11 +78,11 @@ public class DeviceDTO {
         this.gasConcentration = gasConcentration;
     }
 
-    public RoomSummaryDTO getRoom() {
-        return room;
+    public FarmSummaryDTO getFarm() {
+        return farm;
     }
 
-    public void setRoom(RoomSummaryDTO room) {
-        this.room = room;
+    public void setFarm(FarmSummaryDTO farm) {
+        this.farm = farm;
     }
 }

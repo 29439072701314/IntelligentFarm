@@ -12,7 +12,7 @@ export default function DeviceNameTag(props) {
   );
   const color = isHealthDevice ? "green" : "purple";
   return (
-    <Tag icon={deviceName ? icon : null} color={color} {...props}>
+    <Tag icon={deviceName ? icon : null} color={color}>
       {deviceName || "-"}
     </Tag>
   );

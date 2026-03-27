@@ -1,25 +1,23 @@
 import React from "react";
 import { Card, Statistic, Tag, Flex } from "antd";
-import { AlertFilled } from "@ant-design/icons";
 import CountUp from "react-countup";
 import { getDeviceStatus } from "./constant";
 import DeviceNameTag from "../../../../../../component/DeviceNameTag";
-import RoomNumberTag from "../../../../../../component/RoomNumberTag";
+import FarmTag from "../../../../../../component/FarmTag";
 const formatter = (value) => <CountUp end={value} />;
-import { COLORS } from "../../../../../../constant";
 
 export default function DeviceCard(props) {
   const { item } = props;
-  const { deviceName, temperature, humidity, gasConcentration, time, room } =
+  const { deviceName, temperature, humidity, gasConcentration, time, farm } =
     item;
   return (
     <Card
       hoverable
       style={{ backgroundColor: "#c156e108" }}
       extra={
-        <RoomNumberTag
-          color={room?.roomNumber ? "blue" : "orange"}
-          roomNumber={room?.roomNumber || "未绑定"}
+        <FarmTag
+          farmName={farm?.farmName}
+          color={farm?.farmName ? "blue" : "orange"}
         />
       }
       title={<DeviceNameTag deviceName={deviceName} />}

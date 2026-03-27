@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { RoomMapper.class, HealthDeviceSummaryMapper.class })
+@Mapper(componentModel = "spring")
 public interface UserMapper {
     UserDTO toUserDTO(User user);
 

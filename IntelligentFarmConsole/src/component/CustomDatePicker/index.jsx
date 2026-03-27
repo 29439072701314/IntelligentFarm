@@ -39,7 +39,7 @@ export default function CustomDatePicker({
   onChange,
   showTime = true,
   format = "YYYY-MM-DD HH:mm:ss",
-  ...props
+  allowClear = true,
 }) {
   // 当前选中的预设时间类型
   const [preset, setPreset] = useState("1hour");
@@ -107,13 +107,13 @@ export default function CustomDatePicker({
       />
       {/* 时间范围选择器 */}
       <AntdRangePicker
-        {...props}
         value={dateRange}
         onChange={handleRangeChange}
         showTime={showTime}
         format={format}
         style={{ flex: 1 }}
         placeholder={["开始时间", "结束时间"]}
+        allowClear={allowClear}
       />
     </Space.Compact>
   );

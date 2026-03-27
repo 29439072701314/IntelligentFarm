@@ -1,5 +1,4 @@
-import { createBrowserRouter } from "react-router";
-import { NavLink } from "react-router";
+import { createBrowserRouter, Navigate, NavLink } from "react-router";
 import {
   FileOutlined,
   PieChartOutlined,
@@ -23,6 +22,7 @@ import FarmList from "../pages/home/children/Farm/FarmList";
 import LivestockList from "../pages/home/children/Livestock/LivestockList";
 import FeedManage from "../pages/home/children/Feed/FeedManage";
 import DiseaseManage from "../pages/home/children/Disease/DiseaseManage";
+import Warning from "../pages/Warning";
 
 export const publicMenuRoutes = [
   {
@@ -101,6 +101,14 @@ export const publicMenuRoutes = [
       },
     ],
   },
+  {
+    label: <NavLink to="/home/warning">告警管理</NavLink>,
+    key: "warning",
+    icon: <AlertOutlined />,
+    path: "warning",
+    permission: ["admin", "farmer"],
+    element: <Warning />,
+  },
 
   {
     label: "账号管理",
@@ -175,9 +183,12 @@ const baseRouter = [
 
 // 创建动态路由
 export const createDynamicRouter = (userRole) => {
+  console.log('Creating dynamic router with userRole:', userRole);
   // 根据用户角色过滤路由
   const filteredRoutes = filterRoutesByRole(publicMenuRoutes, userRole);
+  console.log('Filtered routes:', filteredRoutes);
   const homeRoutes = convertToRouterFormat(filteredRoutes);
+  console.log('Home routes:', homeRoutes);
   const router = createBrowserRouter([
     ...baseRouter,
     {
@@ -186,13 +197,13 @@ export const createDynamicRouter = (userRole) => {
       children: [
         {
           index: true,
-          element: <NavLink to="/home/dataCenter" replace />,
+          element: <Navigate to="/home/dataCenter" replace />,
         },
         ...homeRoutes,
       ],
     },
   ]);
-  console.log(router);
+  console.log('Created router:', router);
   return router;
 };
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/disease")
+@RequestMapping("/disease")
 public class DiseaseRecordController {
 
     @Autowired
@@ -24,9 +24,15 @@ public class DiseaseRecordController {
 
     // 获取统计数据
     @GetMapping("/statistics")
-    public ResponseMessage<?> getStatistics(@RequestParam(required = false) Long farmId) {
-        if (farmId != null) {
-            return diseaseRecordService.getStatisticsByFarmId(farmId);
+    public ResponseMessage<?> getStatistics(@RequestParam(required = false) String farmId) {
+        if (farmId != null && !farmId.isEmpty()) {
+            try {
+                Long id = Long.valueOf(farmId);
+                return diseaseRecordService.getStatisticsByFarmId(id);
+            } catch (NumberFormatException e) {
+                // 农场ID格式错误，返回所有统计
+                return diseaseRecordService.getStatistics();
+            }
         } else {
             return diseaseRecordService.getStatistics();
         }

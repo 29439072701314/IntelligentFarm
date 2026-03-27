@@ -122,6 +122,9 @@ public class LivestockService implements ILivestockService {
         return ResponseMessage.success(livestock);
     }
     
+    @Autowired
+    private WarningService warningService;
+
     // 检查健康状态并自动创建疾病记录
     private void checkHealthStatusAndCreateDiseaseRecord(Livestock livestock) {
         String healthStatus = livestock.getHealthStatus();
@@ -142,6 +145,8 @@ public class LivestockService implements ILivestockService {
                     "健康异常", 
                     "牲畜健康状态为患病，需要检查具体症状"
                 );
+                // 生成牲畜健康告警
+                warningService.generateWarning("牲畜", livestockCode, "牲畜健康状态为患病", "高");
                 break;
             case "治疗中":
                 diseaseRecordService.autoCreateDiseaseRecord(
@@ -149,6 +154,8 @@ public class LivestockService implements ILivestockService {
                     "治疗中", 
                     "牲畜正在治疗中"
                 );
+                // 生成牲畜健康告警
+                warningService.generateWarning("牲畜", livestockCode, "牲畜正在治疗中", "中");
                 break;
             case "亚健康":
                 diseaseRecordService.autoCreateDiseaseRecord(
@@ -156,9 +163,14 @@ public class LivestockService implements ILivestockService {
                     "亚健康", 
                     "牲畜处于亚健康状态，需要关注"
                 );
+                // 生成牲畜健康告警
+                warningService.generateWarning("牲畜", livestockCode, "牲畜处于亚健康状态", "中");
                 break;
-            // 健康状态不需要创建疾病记录
+            // 健康状态不需要创建疾病记录，但需要消除告警
             case "健康":
+                // 健康状态恢复，消除告警
+                warningService.eliminateLivestockWarning(livestockCode);
+                break;
             default:
                 break;
         }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/feed/formula")
+@RequestMapping("/feed/formula")
 public class FeedFormulaController {
 
     @Autowired

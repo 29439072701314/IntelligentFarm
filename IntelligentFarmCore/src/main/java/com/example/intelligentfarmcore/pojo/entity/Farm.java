@@ -26,11 +26,11 @@ public class Farm {
     private Long userId;
 
     // 关联的牲畜
-    @OneToMany(mappedBy = "farm")
+    @OneToMany(mappedBy = "farm", fetch = FetchType.EAGER)
     private List<Livestock> livestockList;
 
     // 关联的设备
-    @OneToMany(mappedBy = "farm")
+    @OneToMany(mappedBy = "farm", fetch = FetchType.EAGER)
     private List<Device> deviceList;
 
     public Long getFarmId() {
