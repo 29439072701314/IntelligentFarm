@@ -28,25 +28,53 @@ public class MyInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 路径匹配器
+        // 获取请求路径
+        String requestURI = request.getRequestURI();
+        String servletPath = request.getServletPath();
+        
+        // 打印日志用于调试
+        System.out.println("Request URI: " + requestURI);
+        System.out.println("Servlet Path: " + servletPath);
+
+        // 路径匹配器 - 使用 servletPath 进行匹配（不包含 /api 前缀）
         AntPathMatcher pathMatcher = new AntPathMatcher();
         for (String path : allowedPaths) {
-            if (pathMatcher.match(path, request.getRequestURI())) {
+            // 尝试匹配 servletPath（不包含 /api 前缀）
+            if (pathMatcher.match(path, servletPath)) {
+                System.out.println("Path matched (servletPath): " + path);
+                return true;
+            }
+            // 也尝试匹配 requestURI（包含 /api 前缀）
+            if (pathMatcher.match("/api" + path, requestURI)) {
+                System.out.println("Path matched (requestURI with /api): " + "/api" + path);
+                return true;
+            }
+            // 使用 startsWith 进行简单匹配
+            if (servletPath.startsWith(path.replace("/**", ""))) {
+                System.out.println("Path matched (startsWith): " + path);
+                return true;
+            }
+            if (requestURI.startsWith("/api" + path.replace("/**", ""))) {
+                System.out.println("Path matched (startsWith with /api): " + "/api" + path);
                 return true;
             }
         }
 
         // 检查 token
         String token = request.getHeader("Authorization");
+        
+        System.out.println("Authorization header: " + token);
 
         Map<String, Object> claims = JWTUtils.checkToken(token);
 
         //  token 不合法，返回错误
         if (claims == null){
+            System.out.println("Token validation failed");
             ResponseMessage responseMessage = ResponseMessage.error(ErrorCode.TOKEN_INVALID.getCode(), ErrorCode.TOKEN_INVALID.getMessage());
 
             // 转换为 JSONObject
             JSONObject jsonObject = (JSONObject) JSONObject.toJSON(responseMessage);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 返回 401 而不是 403
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(jsonObject.toString());
             return false;

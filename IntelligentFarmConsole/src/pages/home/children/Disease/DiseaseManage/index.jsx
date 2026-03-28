@@ -29,6 +29,7 @@ export default function DiseaseManage() {
   });
   const [checking, setChecking] = useState(false);
   const [farmList, setFarmList] = useState([]);
+  const [livestockList, setLivestockList] = useState([]);
   const [activeTab, setActiveTab] = useState('current');
   const { message } = App.useApp();
 
@@ -118,6 +119,24 @@ export default function DiseaseManage() {
       setFarmList(res.data.content || res.data.list || []);
     } catch (error) {
       console.error("获取农场列表失败", error);
+    }
+  };
+
+  // 根据农场ID加载牲畜列表
+  const loadLivestockByFarmId = async (farmId) => {
+    if (!farmId) {
+      setLivestockList([]);
+      return;
+    }
+    try {
+      const res = await apiGetLivestockList({ 
+        pageNumber: 1, 
+        pageSize: 100, 
+        condition: { farmId } 
+      });
+      setLivestockList(res.data.content || res.data.list || []);
+    } catch (error) {
+      console.error("获取牲畜列表失败", error);
     }
   };
 
@@ -224,6 +243,7 @@ export default function DiseaseManage() {
   const handleAdd = () => {
     setCurrentRecord(null);
     form.resetFields();
+    setLivestockList([]);
     setModalVisible(true);
   };
 
@@ -232,7 +252,7 @@ export default function DiseaseManage() {
     setCurrentRecord(record);
     form.setFieldsValue({
       ...record,
-      onsetDate: record.onsetDate ? dayjs(record.onsetDate) : null
+      onsetDate: record.onsetDate
     });
     setModalVisible(true);
   };
@@ -324,10 +344,20 @@ export default function DiseaseManage() {
   // 处理表单提交
   const handleSubmit = async (values) => {
     try {
+      console.log("表单值:", values);
+      
       const recordData = {
         ...values,
-        onsetDate: values.onsetDate.format("YYYY-MM-DD")
+        onsetDate: values.onsetDate
       };
+      
+      // 移除farmId字段，因为后端不需要
+      if (!currentRecord && recordData.farmId) {
+        delete recordData.farmId;
+      }
+      
+      console.log("提交数据:", recordData);
+      
       if (currentRecord) {
         await apiEditDiseaseRecord(currentRecord.id, recordData);
         message.success("编辑成功");
@@ -339,6 +369,8 @@ export default function DiseaseManage() {
       loadDiseaseList();
       loadStatistics();
     } catch (error) {
+      console.error("提交错误:", error);
+      console.error("错误响应:", error.response);
       message.error(error.response?.data?.message || "操作失败");
     }
   };
@@ -458,19 +490,49 @@ export default function DiseaseManage() {
         ]}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          {!currentRecord && (
+            <Form.Item
+              name="farmId"
+              label="农场"
+              rules={[{ required: true, message: "请选择农场" }]}
+            >
+              <Select
+                placeholder="请选择农场"
+                onChange={(value) => {
+                  form.setFieldValue('livestockCode', undefined);
+                  form.setFieldValue('diseaseName', undefined);
+                  loadLivestockByFarmId(value);
+                }}
+              >
+                {farmList.map(farm => (
+                  <Option key={farm.farmId} value={farm.farmId}>{farm.farmName}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+          )}
+          <Form.Item
+            name="livestockCode"
+            label="牲畜编号"
+            rules={[{ required: true, message: "请选择牲畜" }]}
+          >
+            {!currentRecord ? (
+              <Select placeholder="请选择牲畜">
+                {livestockList.map(livestock => (
+                  <Option key={livestock.livestockCode} value={livestock.livestockCode}>
+                    {livestock.livestockCode} - {livestock.livestockName}
+                  </Option>
+                ))}
+              </Select>
+            ) : (
+              <Input placeholder="请输入牲畜编号" />
+            )}
+          </Form.Item>
           <Form.Item
             name="diseaseName"
             label="疾病名称"
             rules={[{ required: true, message: "请输入疾病名称" }]}
           >
             <Input placeholder="请输入疾病名称" />
-          </Form.Item>
-          <Form.Item
-            name="livestockCode"
-            label="牲畜编号"
-            rules={[{ required: true, message: "请输入牲畜编号" }]}
-          >
-            <Input placeholder="请输入牲畜编号" />
           </Form.Item>
           <Form.Item
             name="onsetDate"

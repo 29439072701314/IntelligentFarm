@@ -30,8 +30,8 @@ public class WarningService {
     @Autowired
     private LivestockDao livestockDao;
 
-    // @Autowired
-    // private SimpMessagingTemplate messagingTemplate;
+    @Autowired(required = false)
+    private SimpMessagingTemplate messagingTemplate;
 
     public Page<Warning> getWarningList(String type, String status, Pageable pageable) {
         if (type != null && status != null) {
@@ -83,7 +83,9 @@ public class WarningService {
             warningDao.save(warning);
             
             // 推送新告警通知
-            // messagingTemplate.convertAndSend("/topic/warnings", new WarningDTO(warning));
+            if (messagingTemplate != null) {
+                messagingTemplate.convertAndSend("/topic/warnings", new WarningDTO(warning));
+            }
         }
     }
 

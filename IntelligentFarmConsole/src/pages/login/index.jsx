@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./index.module.less";
-import { Form, Input, Button, Flex } from "antd";
+import { Form, Input, Button, Flex, message } from "antd";
 import { LockOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
 import { NavLink, useNavigate, useLocation } from "react-router";
 import { useState } from "react";
@@ -38,15 +38,21 @@ export default function Login() {
 
   // 登录提交
   const onLoginSubmit = async () => {
-    const {
-      code,
-      data: { token },
-    } = await apiLogin(form.getFieldsValue());
-    if (code === HTTP_STATUS.OK) {
-      localStorage.setItem("token", token);
-      const userRes = await apiGetUser();
-      dispatch(userSlice.actions.setUser(userRes.data));
-      navigate("/home");
+    try {
+      const res = await apiLogin(form.getFieldsValue());
+      console.log("Login response:", res);
+      
+      if (res.code === HTTP_STATUS.OK && res.data && res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        const userRes = await apiGetUser();
+        dispatch(userSlice.actions.setUser(userRes.data));
+        navigate("/home");
+      } else {
+        message.error(res.message || "登录失败");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      message.error("登录请求失败，请检查网络连接");
     }
   };
 

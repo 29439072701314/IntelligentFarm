@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ERROR_CODE, HTTP_STATUS } from "../constant";
 import { message } from "antd";
-export const BASE_URL = "";
+export const BASE_URL = "http://localhost:8080";
 
 // 封装axios
 const instance = axios.create({
@@ -52,7 +52,29 @@ instance.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    message.error("网络错误，请稍后重试");
+    console.error("Request error:", error);
+    console.error("Error response:", error.response);
+    console.error("Error request:", error.request);
+    
+    if (error.response) {
+      // 服务器返回了错误状态码
+      const status = error.response.status;
+      if (status === 403) {
+        message.error("服务器拒绝了请求(403)，请检查权限配置");
+      } else if (status === 401) {
+        message.error("未授权(401)，请重新登录");
+      } else if (status === 404) {
+        message.error("接口不存在(404)，请检查后端服务");
+      } else {
+        message.error(`服务器错误(${status})，请稍后重试`);
+      }
+    } else if (error.request) {
+      // 请求已发送但没有收到响应
+      message.error("无法连接到服务器，请检查网络或后端服务是否启动");
+    } else {
+      // 请求配置出错
+      message.error("请求配置错误，请稍后重试");
+    }
     return Promise.reject(error);
   }
 );

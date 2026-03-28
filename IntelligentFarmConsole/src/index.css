@@ -1,6 +1,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 html,
@@ -8,12 +9,15 @@ body,
 #root {
   width: 100%;
   height: 100%;
-  color: #7265E3;
+  color: #166534;
 }
 
 body {
-  font-family: Verdana, Arial, "Microsoft Yahei", "Pingfang SC", SimSun;
-  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 14px;
+  line-height: 1.5715;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%);
+  background-attachment: fixed;
 }
 
 a {
@@ -25,4 +29,45 @@ ol,
 ul,
 li {
   list-style: none;
+}
+
+/* 智能养殖系统全局样式 */
+:root {
+  --farm-primary: #16a34a;
+  --farm-primary-light: #22c55e;
+  --farm-primary-dark: #15803d;
+  --farm-secondary: #0d9488;
+  --farm-bg-light: #f0fdf4;
+  --farm-bg-white: #ffffff;
+  --farm-border: #bbf7d0;
+  --farm-text-primary: #166534;
+  --farm-text-secondary: #374151;
+  --farm-shadow: rgba(22, 101, 52, 0.08);
+  --farm-shadow-hover: rgba(22, 101, 52, 0.15);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0fdf4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #86efac 0%, #4ade80 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+}
+
+/* 选中文本样式 */
+::selection {
+  background: rgba(34, 197, 94, 0.3);
+  color: #166534;
 }
