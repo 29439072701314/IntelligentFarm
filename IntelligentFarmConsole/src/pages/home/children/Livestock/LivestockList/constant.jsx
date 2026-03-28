@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, Input, Tag } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { Button, Input, Tag, DatePicker } from 'antd';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 
 export const getColumns = (handleEdit, handleDelete, handleDetail) => {
   return [
@@ -48,6 +49,9 @@ export const getColumns = (handleEdit, handleDelete, handleDetail) => {
       dataIndex: "inTime",
       key: "inTime",
       render: (text) => text ? new Date(text).toLocaleString() : '-',
+      formItemProps: {
+        render: false,
+      },
     },
     {
       title: "操作",
@@ -67,14 +71,6 @@ export const getColumns = (handleEdit, handleDelete, handleDetail) => {
             onClick={() => handleEdit(record)}
           >
             编辑
-          </Button>
-          <Button
-            type="link"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            删除
           </Button>
         </div>
       ),

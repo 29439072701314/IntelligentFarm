@@ -7,7 +7,6 @@ import { Form, Modal, Button, message } from "antd";
 import { getColumns } from "./constant";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import FarmEditModal from "./component/FarmEditModal";
-import FarmDetailModal from "./component/FarmDetailModal";
 
 const { confirm } = Modal;
 
@@ -16,14 +15,12 @@ export default function FarmList() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [form] = Form.useForm();
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [currentFarm, setCurrentFarm] = useState(null);
 
   // 搜索前处理
   const handleBeforeSearch = (values) => {
     return {
       ...values,
-      name: values.name,
     };
   };
 
@@ -53,12 +50,6 @@ export default function FarmList() {
   const handleEdit = (record) => {
     setCurrentFarm(record);
     setEditModalVisible(true);
-  };
-
-  // 查看农场详情
-  const handleDetail = (record) => {
-    setCurrentFarm(record);
-    setDetailModalVisible(true);
   };
 
   // 查看牲畜
@@ -104,7 +95,7 @@ export default function FarmList() {
         form={form}
         api={apiGetFarmList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleEdit, handleDelete, handleDetail, handleViewLivestock)}
+        columns={getColumns(handleEdit, handleDelete, handleViewLivestock)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加
@@ -127,11 +118,6 @@ export default function FarmList() {
           form.getData();
         }}
         farm={currentFarm}
-      />
-      <FarmDetailModal
-        visible={detailModalVisible}
-        onClose={() => setDetailModalVisible(false)}
-        farmId={currentFarm?.farmId}
       />
     </Content>
   );

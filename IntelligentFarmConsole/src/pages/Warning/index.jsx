@@ -24,7 +24,6 @@ const WarningPage = () => {
   const [size, setSize] = useState(10);
   const [stompClient, setStompClient] = useState(null);
   const [activeTab, setActiveTab] = useState('current');
-  const [status, setStatus] = useState('未处理');
 
   useEffect(() => {
     fetchWarnings();
@@ -40,26 +39,35 @@ const WarningPage = () => {
 
   useEffect(() => {
     fetchWarnings();
-  }, [type, page, size, status]);
-
-  useEffect(() => {
-    setStatus(activeTab === 'current' ? '未处理' : '已处理');
-  }, [activeTab]);
+  }, [type, page, size, activeTab]);
 
   const fetchWarnings = async () => {
     try {
+      // 对于当前告警标签，使用较大的分页大小，确保能够获取到所有处理中的告警
+      const currentSize = activeTab === 'current' ? 100 : size;
+      const currentPage = activeTab === 'current' ? 1 : page;
       const params = {
-        page,
-        size,
-        status
+        page: currentPage,
+        size: currentSize
       };
       if (type !== "全部") {
         params.type = type;
       }
       const response = await instance.get("/api/warning/list", { params });
       if (response && response.data) {
-        setWarnings(response.data.list || []);
-        setTotal(response.data.total || 0);
+        let filteredWarnings = response.data.list || [];
+        // 根据标签筛选告警
+        if (activeTab === 'current') {
+          // 当前告警：只显示未处理和处理中的告警
+          filteredWarnings = filteredWarnings.filter(w => w.status === "未处理" || w.status === "处理中");
+        } else if (activeTab === 'history') {
+          // 历史告警：只显示已解决和已处理的告警
+          filteredWarnings = filteredWarnings.filter(w => w.status === "已解决" || w.status === "已处理");
+        }
+        setWarnings(filteredWarnings);
+        // 对于当前告警标签，使用筛选后的记录数作为总记录数
+        // 对于历史告警标签，使用后端返回的总记录数
+        setTotal(activeTab === 'current' ? filteredWarnings.length : response.data.total || 0);
       } else {
         message.error("获取告警列表失败：数据格式错误");
       }
@@ -167,10 +175,15 @@ const WarningPage = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        if (status === "已处理") {
-          return <Tag color="green">已处理</Tag>;
-        } else {
-          return <Tag color="red">未处理</Tag>;
+        switch (status) {
+          case "已解决":
+          case "已处理":
+            return <Tag color="green">已解决</Tag>;
+          case "处理中":
+            return <Tag color="orange">处理中</Tag>;
+          case "未处理":
+          default:
+            return <Tag color="red">未处理</Tag>;
         }
       }
     },

@@ -57,7 +57,7 @@ public class WarningService {
     public void handleWarning(Long id) {
         Warning warning = warningDao.findById(id).orElse(null);
         if (warning != null) {
-            warning.setStatus("已处理");
+            warning.setStatus("处理中");
             warning.setHandledAt(LocalDateTime.now());
             warningDao.save(warning);
         }
@@ -70,21 +70,36 @@ public class WarningService {
     }
 
     public void generateWarning(String type, String source, String details, String level) {
+        // 检查是否存在未处理的告警
         long count = warningDao.countByTypeAndSourceAndStatus(type, source);
         if (count == 0) {
-            Warning warning = new Warning();
-            warning.setType(type);
-            warning.setSource(source);
-            warning.setDetail(details);
-            warning.setDetails(details);
-            warning.setLevel(level);
-            warning.setStatus("未处理");
-            warning.setCreatedAt(LocalDateTime.now());
-            warningDao.save(warning);
+            // 检查是否存在处理中的告警
+            List<Warning> existingWarnings = warningDao.findAll();
+            boolean hasProcessingWarning = false;
             
-            // 推送新告警通知
-            if (messagingTemplate != null) {
-                messagingTemplate.convertAndSend("/topic/warnings", new WarningDTO(warning));
+            for (Warning warning : existingWarnings) {
+                if (warning.getType().equals(type) && warning.getSource().equals(source) && 
+                    warning.getStatus().equals("处理中")) {
+                    hasProcessingWarning = true;
+                    break;
+                }
+            }
+            
+            if (!hasProcessingWarning) {
+                Warning warning = new Warning();
+                warning.setType(type);
+                warning.setSource(source);
+                warning.setDetail(details);
+                warning.setDetails(details);
+                warning.setLevel(level);
+                warning.setStatus("未处理");
+                warning.setCreatedAt(LocalDateTime.now());
+                warningDao.save(warning);
+                
+                // 推送新告警通知
+                if (messagingTemplate != null) {
+                    messagingTemplate.convertAndSend("/topic/warnings", new WarningDTO(warning));
+                }
             }
         }
     }
@@ -92,8 +107,9 @@ public class WarningService {
     public void eliminateWarning(String type, String source) {
         List<Warning> warnings = warningDao.findAll();
         for (Warning warning : warnings) {
-            if (warning.getType().equals(type) && warning.getSource().equals(source) && warning.getStatus().equals("未处理")) {
-                warning.setStatus("已处理");
+            if (warning.getType().equals(type) && warning.getSource().equals(source) && 
+                (warning.getStatus().equals("未处理") || warning.getStatus().equals("处理中"))) {
+                warning.setStatus("已解决");
                 warning.setHandledAt(LocalDateTime.now());
                 warningDao.save(warning);
             }

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react";
 import ProTable from "@/component/ProTable";
 import Content from "@/component/Content";
-import { Form, Modal, Button, App } from "antd";
+import { Form, Button, App } from "antd";
 import { getColumns } from "./constant";
-import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import LivestockEditModal from "./component/LivestockEditModal";
 import LivestockDetailModal from "./component/LivestockDetailModal";
-import { apiGetLivestockList, apiDeleteLivestock } from "@/services/livestockApi";
+import { apiGetLivestockList } from "@/services/livestockApi";
 import { useLocation } from "react-router";
 
-const { confirm } = Modal;
-
 export default function LivestockList() {
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [form] = Form.useForm();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
@@ -38,21 +35,7 @@ export default function LivestockList() {
     };
   };
 
-  // 删除牲畜
-  const handleDelete = (record) => {
-    confirm({
-      title: "提示",
-      content: `确认删除牲畜 ${record.livestockName} 吗？`,
-      onOk: async () => {
-        try {
-          await apiDeleteLivestock(record.livestockId);
-          form.getData();
-        } catch (error) {
-          message.error(error.response?.data?.message || "删除失败");
-        }
-      },
-    });
-  };
+
 
   // 添加牲畜
   const handleAdd = () => {
@@ -72,56 +55,19 @@ export default function LivestockList() {
     setDetailModalVisible(true);
   };
 
-  // 批量删除牲畜
-  const handleBatchDelete = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning("请选择要删除的牲畜");
-      return;
-    }
-    confirm({
-      title: "提示",
-      content: `确认删除选中的 ${selectedRowKeys.length} 个牲畜吗？`,
-      onOk: async () => {
-        try {
-          for (const livestockId of selectedRowKeys) {
-            await apiDeleteLivestock(livestockId);
-          }
-          setSelectedRowKeys([]);
-          form.getData();
-        } catch (error) {
-          message.error(error.response?.data?.message || "批量删除失败");
-        }
-      },
-    });
-  };
+
 
   return (
     <Content title={farmId ? "农场牲畜列表" : "牲畜列表"}>
       <ProTable
         rowKey="livestockId"
-        rowSelection={{
-          type: "checkbox",
-          selectedRowKeys: selectedRowKeys,
-          preserveSelectedRowKeys: true,
-          onChange: (selectedRowKeys, selectedRows) => {
-            setSelectedRowKeys(selectedRowKeys);
-          },
-        }}
         form={form}
         api={apiGetLivestockList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleEdit, handleDelete, handleDetail)}
+        columns={getColumns(handleEdit, null, handleDetail)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加
-          </Button>,
-          <Button
-            icon={<DeleteOutlined />}
-            type="primary"
-            danger
-            onClick={handleBatchDelete}
-          >
-            批量删除
           </Button>,
         ]}
       />

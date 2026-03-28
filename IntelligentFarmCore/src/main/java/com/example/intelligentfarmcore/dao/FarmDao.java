@@ -15,6 +15,17 @@ public interface FarmDao extends JpaRepository<Farm, Long> {
     @Query("SELECT f FROM Farm f WHERE f.farmName LIKE %:name%")
     List<Farm> findByFarmNameContaining(@Param("name") String name);
 
+    // 根据地址模糊查询
+    @Query("SELECT f FROM Farm f WHERE f.address LIKE %:address%")
+    List<Farm> findByAddressContaining(@Param("address") String address);
+
+    // 多条件组合查询
+    @Query("SELECT f FROM Farm f WHERE (:farmName IS NULL OR f.farmName LIKE %:farmName%) AND (:address IS NULL OR f.address LIKE %:address%) AND (:livestockCount IS NULL OR SIZE(f.livestockList) = :livestockCount) AND (:deviceCount IS NULL OR SIZE(f.deviceList) = :deviceCount)")
+    List<Farm> searchFarms(@Param("farmName") String farmName, 
+                          @Param("address") String address, 
+                          @Param("livestockCount") Integer livestockCount, 
+                          @Param("deviceCount") Integer deviceCount);
+
     // 检查农场是否有关联的牲畜
     @Query("SELECT COUNT(l) FROM Livestock l WHERE l.farmId = :farmId")
     long countLivestockByFarmId(@Param("farmId") Long farmId);

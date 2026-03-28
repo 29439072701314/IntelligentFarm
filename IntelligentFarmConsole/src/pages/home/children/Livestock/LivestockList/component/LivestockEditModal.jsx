@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Form, Input, Button, message } from "antd";
+import { Modal, Form, Input, Button, message, Select } from "antd";
+
+const { Option } = Select;
 import { apiAddLivestock, apiEditLivestock } from "@/services/livestockApi";
 
 export default function LivestockEditModal({ visible, onClose, onSuccess, livestock, farmId }) {
@@ -12,6 +14,7 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
         form.setFieldsValue({
           livestockName: livestock.livestockName,
           livestockType: livestock.livestockType,
+          healthStatus: livestock.healthStatus || "健康"
         });
       } else {
         form.resetFields();
@@ -73,6 +76,18 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
           rules={[{ required: true, message: "请输入牲畜类型" }]}
         >
           <Input placeholder="请输入牲畜类型" />
+        </Form.Item>
+        <Form.Item
+          name="healthStatus"
+          label="健康状态"
+          rules={[{ required: true, message: "请选择健康状态" }]}
+        >
+          <Select placeholder="请选择健康状态">
+            <Option value="健康">健康</Option>
+            <Option value="亚健康">亚健康</Option>
+            <Option value="患病">患病</Option>
+            <Option value="治疗中">治疗中</Option>
+          </Select>
         </Form.Item>
       </Form>
     </Modal>

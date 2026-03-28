@@ -9,6 +9,7 @@ import com.example.intelligentfarmcore.pojo.entity.Livestock;
 import com.example.intelligentfarmcore.pojo.model.ResponseMessage;
 import com.example.intelligentfarmcore.pojo.request.PageReq;
 import com.example.intelligentfarmcore.pojo.response.PageRes;
+import com.example.intelligentfarmcore.service.WarningService;
 import com.example.intelligentfarmcore.service.interfaces.IDiseaseRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,6 +30,8 @@ public class DiseaseRecordService implements IDiseaseRecordService {
     private DiseaseRecordDao diseaseRecordDao;
     @Autowired
     private LivestockDao livestockDao;
+    @Autowired
+    private WarningService warningService;
 
     @Override
     public ResponseMessage<PageRes<DiseaseRecordDTO>> getDiseaseList(PageReq pageReq) {
@@ -220,6 +223,21 @@ public class DiseaseRecordService implements IDiseaseRecordService {
         diseaseRecord.setStatus("治疗中");
         diseaseRecord.setDeleted(false);
         DiseaseRecord savedRecord = diseaseRecordDao.save(diseaseRecord);
+        
+        // 生成牲畜健康告警
+        String livestockCode = diseaseRecord.getLivestockCode();
+        if (livestockCode != null && !livestockCode.isEmpty()) {
+            warningService.generateWarning("牲畜", livestockCode, "牲畜健康状态异常: " + diseaseRecord.getDiseaseName(), "高");
+            
+            // 更新对应牲畜的健康状态为患病
+            List<Livestock> livestockList = livestockDao.findByLivestockCode(livestockCode);
+            if (!livestockList.isEmpty()) {
+                Livestock livestock = livestockList.get(0);
+                livestock.setHealthStatus("患病");
+                livestockDao.save(livestock);
+            }
+        }
+        
         return ResponseMessage.success(savedRecord, "新增疾病记录成功");
     }
 
@@ -264,6 +282,20 @@ public class DiseaseRecordService implements IDiseaseRecordService {
         // 更新状态为已康复
         diseaseRecord.setStatus("已康复");
         DiseaseRecord updatedRecord = diseaseRecordDao.save(diseaseRecord);
+        
+        // 消除牲畜健康告警
+        String livestockCode = diseaseRecord.getLivestockCode();
+        if (livestockCode != null && !livestockCode.isEmpty()) {
+            warningService.eliminateLivestockWarning(livestockCode);
+            
+            // 更新对应牲畜的健康状态为健康
+            List<Livestock> livestockList = livestockDao.findByLivestockCode(livestockCode);
+            if (!livestockList.isEmpty()) {
+                Livestock livestock = livestockList.get(0);
+                livestock.setHealthStatus("健康");
+                livestockDao.save(livestock);
+            }
+        }
         
         return ResponseMessage.success(updatedRecord, "标记康复成功");
     }

@@ -29,11 +29,20 @@ public class FarmService implements IFarmService {
     public ResponseMessage<PageRes<FarmDTO>> getFarmList(PageReq pageReq) {
         Pageable pageable = PageRequest.of(pageReq.getPageNumber() - 1, pageReq.getPageSize());
         Page<Farm> farmPage;
+        List<Farm> farms;
 
-        // 如果有搜索条件，根据名称模糊查询
-        if (pageReq.getCondition() != null && pageReq.getCondition().containsKey("name")) {
-            String name = (String) pageReq.getCondition().get("name");
-            List<Farm> farms = farmDao.findByFarmNameContaining(name);
+        // 获取查询条件
+        Map<String, Object> condition = pageReq.getCondition();
+        String farmName = condition != null ? (String) condition.get("farmName") : null;
+        String address = condition != null ? (String) condition.get("address") : null;
+        Integer livestockCount = condition != null && condition.get("livestockCount") != null ? 
+            Integer.valueOf(condition.get("livestockCount").toString()) : null;
+        Integer deviceCount = condition != null && condition.get("deviceCount") != null ? 
+            Integer.valueOf(condition.get("deviceCount").toString()) : null;
+
+        // 如果有搜索条件，使用多条件查询
+        if (farmName != null || address != null || livestockCount != null || deviceCount != null) {
+            farms = farmDao.searchFarms(farmName, address, livestockCount, deviceCount);
             // 手动分页
             int start = (pageReq.getPageNumber() - 1) * pageReq.getPageSize();
             int end = Math.min(start + pageReq.getPageSize(), farms.size());

@@ -16,8 +16,7 @@ public interface ILivestockService {
     // 编辑牲畜
     ResponseMessage<Livestock> editLivestock(Livestock livestock);
 
-    // 删除牲畜
-    ResponseMessage<String> deleteLivestock(Long livestockId);
+
 
     // 获取牲畜详情
     ResponseMessage<Livestock> getLivestockDetail(Long livestockId);

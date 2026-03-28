@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LivestockService implements ILivestockService {
@@ -29,35 +30,66 @@ public class LivestockService implements ILivestockService {
     public ResponseMessage<PageRes<LivestockDTO>> getLivestockList(PageReq pageReq) {
         Pageable pageable = PageRequest.of(pageReq.getPageNumber() - 1, pageReq.getPageSize());
         Page<Livestock> livestockPage;
+        List<Livestock> livestockList;
 
-        // 如果有农场ID，根据农场ID查询
-        if (pageReq.getCondition() != null && pageReq.getCondition().containsKey("farmId")) {
-            Long farmId = Long.valueOf(pageReq.getCondition().get("farmId").toString());
-            List<Livestock> livestockList;
-            
-            // 如果有搜索条件，根据农场ID和名称模糊查询
-            if (pageReq.getCondition().containsKey("livestockName")) {
-                String name = (String) pageReq.getCondition().get("livestockName");
-                livestockList = livestockDao.findByFarmIdAndLivestockNameContaining(farmId, name);
-            } else {
-                livestockList = livestockDao.findByFarmId(farmId);
-            }
-            
-            // 手动分页
-            int start = (pageReq.getPageNumber() - 1) * pageReq.getPageSize();
-            int end = Math.min(start + pageReq.getPageSize(), livestockList.size());
-            List<Livestock> pageLivestock = livestockList.subList(start, end);
-            List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(pageLivestock);
-            int totalPages = (livestockList.size() + pageReq.getPageSize() - 1) / pageReq.getPageSize();
-            PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size());
-            return ResponseMessage.success(pageRes);
+        // 获取查询条件
+        Map<String, Object> condition = pageReq.getCondition();
+        String livestockCode = condition != null ? (String) condition.get("livestockCode") : null;
+        String livestockType = condition != null ? (String) condition.get("type") : null;
+        String healthStatus = condition != null ? (String) condition.get("healthStatus") : null;
+        Double weight = condition != null && condition.get("weight") != null ? 
+            Double.valueOf(condition.get("weight").toString()) : null;
+
+        // 先获取所有符合条件的牲畜
+        if (condition != null && condition.containsKey("farmId")) {
+            Long farmId = Long.valueOf(condition.get("farmId").toString());
+            livestockList = livestockDao.findByFarmId(farmId);
         } else {
-            // 否则查询所有
-            livestockPage = livestockDao.findAll(pageable);
-            List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(livestockPage.getContent());
-            PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, (int) livestockPage.getTotalElements());
-            return ResponseMessage.success(pageRes);
+            livestockList = livestockDao.findAll();
         }
+        
+        // 过滤条件
+        if (livestockCode != null) {
+            livestockList = livestockList.stream()
+                .filter(livestock -> livestock.getLivestockCode().contains(livestockCode))
+                .toList();
+        }
+        
+        if (livestockType != null) {
+            livestockList = livestockList.stream()
+                .filter(livestock -> livestock.getLivestockType() != null && livestock.getLivestockType().contains(livestockType))
+                .toList();
+        }
+        
+        if (healthStatus != null) {
+            livestockList = livestockList.stream()
+                .filter(livestock -> livestock.getHealthStatus() != null && livestock.getHealthStatus().contains(healthStatus))
+                .toList();
+        }
+        
+        if (weight != null) {
+            livestockList = livestockList.stream()
+                .filter(livestock -> livestock.getWeight() != null && livestock.getWeight().equals(weight))
+                .toList();
+        }
+        
+        // 手动分页
+        List<Livestock> pageLivestock = new java.util.ArrayList<>();
+        int totalPages = 0;
+        int pageNumber = pageReq.getPageNumber() != null && pageReq.getPageNumber() > 0 ? pageReq.getPageNumber() : 1;
+        int pageSize = pageReq.getPageSize() != null && pageReq.getPageSize() > 0 ? pageReq.getPageSize() : 10;
+        
+        if (!livestockList.isEmpty()) {
+            int start = (pageNumber - 1) * pageSize;
+            int end = Math.min(start + pageSize, livestockList.size());
+            if (start < livestockList.size() && start >= 0 && end > start) {
+                pageLivestock = livestockList.subList(start, end);
+            }
+            totalPages = (livestockList.size() + pageSize - 1) / pageSize;
+        }
+        List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(pageLivestock);
+        PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size());
+        return ResponseMessage.success(pageRes);
     }
 
     @Transactional
@@ -92,25 +124,18 @@ public class LivestockService implements ILivestockService {
         
         Livestock updatedLivestock = livestockDao.save(existingLivestock);
         
-        // 如果健康状态从健康变为不健康，自动创建疾病记录
-        if (!"健康".equals(oldHealthStatus) && !"健康".equals(updatedLivestock.getHealthStatus())) {
+        // 如果健康状态变为不健康，自动创建疾病记录
+        if (!"健康".equals(updatedLivestock.getHealthStatus())) {
             checkHealthStatusAndCreateDiseaseRecord(updatedLivestock);
+        } else if ("健康".equals(updatedLivestock.getHealthStatus()) && !"健康".equals(oldHealthStatus)) {
+            // 如果健康状态从不健康变为健康，消除告警
+            warningService.eliminateLivestockWarning(updatedLivestock.getLivestockCode());
         }
         
         return ResponseMessage.success(updatedLivestock, "编辑牲畜成功");
     }
 
-    @Override
-    public ResponseMessage<String> deleteLivestock(Long livestockId) {
-        // 检查牲畜是否存在
-        Livestock livestock = livestockDao.findById(livestockId).orElse(null);
-        if (livestock == null) {
-            return ResponseMessage.error("牲畜不存在");
-        }
-        // 删除牲畜
-        livestockDao.deleteById(livestockId);
-        return ResponseMessage.success("删除牲畜成功");
-    }
+
 
     @Override
     public ResponseMessage<Livestock> getLivestockDetail(Long livestockId) {

@@ -35,11 +35,7 @@ public class LivestockController {
         return livestockService.editLivestock(livestock);
     }
 
-    // 删除牲畜
-    @DeleteMapping("/{id}")
-    public ResponseMessage<?> deleteLivestock(@PathVariable("id") Long id) {
-        return livestockService.deleteLivestock(id);
-    }
+
 
     // 获取牲畜详情
     @GetMapping("/{id}/detail")

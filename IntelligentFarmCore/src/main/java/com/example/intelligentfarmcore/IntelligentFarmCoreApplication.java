@@ -2,10 +2,19 @@ package com.example.intelligentfarmcore;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 import io.github.cdimascio.dotenv.Dotenv;
+
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
 @SpringBootApplication
 public class IntelligentFarmCoreApplication {
+
+    @PostConstruct
+    void setDefaultTimeZone() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+    }
 
     public static void main(String[] args) {
         // 加载.env文件
