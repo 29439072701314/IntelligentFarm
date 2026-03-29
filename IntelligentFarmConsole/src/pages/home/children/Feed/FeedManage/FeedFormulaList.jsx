@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Input, Modal, Form, message, Popconfirm, Space, Tag } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, WarningOutlined } from "@ant-design/icons";
-import { apiGetFormulaList, apiAddFormula, apiEditFormula, apiDeleteFormula, apiUpdateStock } from "@/services/feedApi";
+import { EditOutlined, DeleteOutlined, PlusOutlined, WarningOutlined, InboxOutlined } from "@ant-design/icons";
+import { apiGetFormulaList, apiAddFormula, apiEditFormula, apiDeleteFormula, apiAddStockRecord } from "@/services/feedApi";
 
 const { Column } = Table;
 
 export default function FeedFormulaList() {
   const [form] = Form.useForm();
+  const [stockForm] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [stockModalVisible, setStockModalVisible] = useState(false);
   const [currentFormula, setCurrentFormula] = useState(null);
-  const [editingStock, setEditingStock] = useState({});
+  const [currentStockFormula, setCurrentStockFormula] = useState(null);
 
   // 加载配方列表
   const loadFormulaList = async () => {
@@ -73,32 +75,27 @@ export default function FeedFormulaList() {
     }
   };
 
-  // 处理库存编辑开始
-  const handleStockEditStart = (record) => {
-    setEditingStock({ ...editingStock, [record.id]: record.stock });
+  // 处理入库
+  const handleStockIn = (record) => {
+    setCurrentStockFormula(record);
+    stockForm.resetFields();
+    setStockModalVisible(true);
   };
 
-  // 处理库存编辑结束
-  const handleStockEditEnd = async (record) => {
-    const newStock = editingStock[record.id];
-    if (newStock !== undefined && newStock !== record.stock) {
-      try {
-        await apiUpdateStock(record.id, newStock);
-        message.success("库存更新成功");
-        loadFormulaList();
-      } catch (error) {
-        message.error(error.response?.data?.message || "库存更新失败");
-        // 恢复原库存
-        setEditingStock({ ...editingStock, [record.id]: record.stock });
-      }
+  // 处理入库提交
+  const handleStockSubmit = async (values) => {
+    try {
+      await apiAddStockRecord({
+        formulaId: currentStockFormula.id,
+        quantity: values.quantity,
+        remark: values.remark
+      });
+      message.success("入库成功");
+      setStockModalVisible(false);
+      loadFormulaList();
+    } catch (error) {
+      message.error(error.response?.data?.message || "入库失败");
     }
-    // 清除编辑状态
-    setEditingStock({ ...editingStock, [record.id]: undefined });
-  };
-
-  // 处理库存变化
-  const handleStockChange = (e, id) => {
-    setEditingStock({ ...editingStock, [id]: parseFloat(e.target.value) || 0 });
   };
 
   // 行样式
@@ -138,14 +135,7 @@ export default function FeedFormulaList() {
           key="stock"
           render={(text, record) => (
             <Space>
-              <Input
-                type="text"
-                style={{ width: 60, ...getStockStyle(record) }}
-                value={editingStock[record.id] !== undefined ? editingStock[record.id] : text}
-                onChange={(e) => handleStockChange(e, record.id)}
-                onFocus={() => handleStockEditStart(record)}
-                onBlur={() => handleStockEditEnd(record)}
-              />
+              <span style={getStockStyle(record)}>{text}</span>
               <span>吨</span>
               {record.stock < record.threshold && (
                 <Tag color="error" icon={<WarningOutlined />}>
@@ -172,6 +162,13 @@ export default function FeedFormulaList() {
                 onClick={() => handleEdit(record)}
               >
                 编辑
+              </Button>
+              <Button
+                type="link"
+                icon={<InboxOutlined />}
+                onClick={() => handleStockIn(record)}
+              >
+                入库
               </Button>
               <Popconfirm
                 title="确定删除该配方吗？"
@@ -225,10 +222,10 @@ export default function FeedFormulaList() {
           </Form.Item>
           <Form.Item
             name="stock"
-            label="库存"
-            rules={[{ required: true, message: "请输入库存" }]}
+            label="初始库存"
+            rules={[{ required: true, message: "请输入初始库存" }]}
           >
-            <Input type="number" placeholder="请输入库存" />
+            <Input type="number" placeholder="请输入初始库存" />
           </Form.Item>
           <Form.Item
             name="threshold"
@@ -236,6 +233,42 @@ export default function FeedFormulaList() {
             rules={[{ required: true, message: "请输入阈值" }]}
           >
             <Input type="number" placeholder="请输入阈值" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="饲料入库"
+        open={stockModalVisible}
+        onCancel={() => setStockModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setStockModalVisible(false)}>
+            取消
+          </Button>,
+          <Button key="submit" type="primary" onClick={() => stockForm.submit()}>
+            确定
+          </Button>,
+        ]}
+      >
+        <Form form={stockForm} layout="vertical" onFinish={handleStockSubmit}>
+          <Form.Item
+            label="配方名称"
+            valuePropName="name"
+          >
+            <Input value={currentStockFormula?.name} disabled />
+          </Form.Item>
+          <Form.Item
+            name="quantity"
+            label="入库数量"
+            rules={[{ required: true, message: "请输入入库数量" }]}
+          >
+            <Input type="number" placeholder="请输入入库数量" />
+          </Form.Item>
+          <Form.Item
+            name="remark"
+            label="备注"
+          >
+            <Input placeholder="请输入备注" />
           </Form.Item>
         </Form>
       </Modal>

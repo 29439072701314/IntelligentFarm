@@ -40,10 +40,4 @@ public class FeedFormulaController {
     public ResponseMessage<?> deleteFormula(@PathVariable("id") Long id) {
         return feedFormulaService.deleteFormula(id);
     }
-
-    // 更新库存
-    @PutMapping("/{id}/stock")
-    public ResponseMessage<?> updateStock(@PathVariable("id") Long id, @RequestParam Double stock) {
-        return feedFormulaService.updateStock(id, stock);
-    }
 }

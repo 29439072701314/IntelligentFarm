@@ -5,7 +5,11 @@ export const apiGetFormulaList = (data) => get("/api/feed/formula/list", data);
 export const apiAddFormula = (data) => post("/api/feed/formula", data);
 export const apiEditFormula = (id, data) => put(`/api/feed/formula/${id}`, data);
 export const apiDeleteFormula = (id) => del(`/api/feed/formula/${id}`);
-export const apiUpdateStock = (id, stock) => put(`/api/feed/formula/${id}/stock?stock=${stock}`);
+
+// 入库相关API
+export const apiAddStockRecord = (data) => post("/api/feed/stock", data);
+export const apiGetStockRecordList = (data) => get("/api/feed/stock/list", data);
+export const apiGetStockRecordsByFormulaId = (formulaId) => get(`/api/feed/stock/formula/${formulaId}`);
 
 // 计划相关API
 export const apiGetPlanList = (data) => get("/api/feed/plan/list", data);

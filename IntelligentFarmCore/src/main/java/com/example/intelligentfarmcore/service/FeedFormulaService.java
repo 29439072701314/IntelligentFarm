@@ -148,4 +148,13 @@ public class FeedFormulaService implements IFeedFormulaService {
         }
         return ResponseMessage.success(updatedFormula, "更新库存成功");
     }
+
+    @Override
+    public ResponseMessage<?> getFormulaById(Long id) {
+        FeedFormula formula = feedFormulaDao.findById(id).orElse(null);
+        if (formula == null) {
+            return ResponseMessage.error("配方不存在");
+        }
+        return ResponseMessage.success(formula);
+    }
 }

@@ -21,4 +21,7 @@ public interface IFeedFormulaService {
 
     // 更新库存
     ResponseMessage<FeedFormula> updateStock(Long id, Double stock);
+
+    // 根据ID获取配方
+    ResponseMessage<?> getFormulaById(Long id);
 }
