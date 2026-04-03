@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, Input, Modal, Form, message, Popconfirm, DatePicker, Select, Tag } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { apiGetPlanList, apiAddPlan, apiEditPlan, apiDeletePlan, apiUpdateStatus, apiExecutePlan, apiGetFormulaList } from "@/services/feedApi";
+import { apiGetFarmList } from "@/services/farmApi";
 import dayjs from "dayjs";
 
 const { Column } = Table;
@@ -12,6 +13,7 @@ export default function FeedPlanList() {
   const [form] = Form.useForm();
   const [dataSource, setDataSource] = useState([]);
   const [formulaOptions, setFormulaOptions] = useState([]);
+  const [farmOptions, setFarmOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentPlan, setCurrentPlan] = useState(null);
@@ -25,6 +27,17 @@ export default function FeedPlanList() {
       setFormulaOptions(list.map(item => ({ label: item.name, value: item.id })));
     } catch (error) {
       message.error(error.response?.data?.message || "获取配方列表失败");
+    }
+  };
+
+  // 加载农场列表用于下拉选择
+  const loadFarmOptions = async () => {
+    try {
+      const res = await apiGetFarmList({ pageNumber: 1, pageSize: 100 });
+      const list = res.data.content || res.data.list || [];
+      setFarmOptions(list.map(item => ({ label: item.farmName, value: item.farmId })));
+    } catch (error) {
+      message.error(error.response?.data?.message || "获取农场列表失败");
     }
   };
 
@@ -49,6 +62,7 @@ export default function FeedPlanList() {
   // 初始化加载
   useEffect(() => {
     loadFormulaOptions();
+    loadFarmOptions();
     loadPlanList();
   }, []);
 
@@ -69,8 +83,10 @@ export default function FeedPlanList() {
     setCurrentPlan(record);
     form.setFieldsValue({
       ...record,
-      planDate: record.planDate ? dayjs(record.planDate) : null,
-      planTime: record.planTime ? dayjs(`2023-01-01 ${record.planTime}`) : null
+      farmId: record.area, // 使用area字段的值作为farmId
+      planDate: (record.planDate || record.date) ? dayjs(record.planDate || record.date) : null,
+      planTime: (record.planTime || record.time) ? dayjs(`2023-01-01 ${record.planTime || record.time}`) : null,
+      amount: record.amount || record.quantity // 使用amount或quantity字段的值
     });
     setModalVisible(true);
   };
@@ -92,7 +108,12 @@ export default function FeedPlanList() {
       const planData = {
         ...values,
         planDate: values.planDate.format("YYYY-MM-DD"),
-        planTime: values.planTime.format("HH:mm:ss")
+        planTime: values.planTime.format("HH:mm:ss"),
+        area: values.farmId, // 保持与后端的兼容，使用farmId作为area字段的值
+        date: values.planDate.format("YYYY-MM-DD"), // 同时设置date字段
+        time: values.planTime.format("HH:mm:ss"), // 同时设置time字段
+        amount: values.amount, // 同时设置amount字段
+        quantity: values.amount // 同时设置quantity字段
       };
       if (currentPlan) {
         await apiEditPlan(currentPlan.id, planData);
@@ -163,11 +184,38 @@ export default function FeedPlanList() {
         rowKey="id"
         loading={loading}
       >
-        <Column title="日期" dataIndex="planDate" key="planDate" />
-        <Column title="时间" dataIndex="planTime" key="planTime" />
-        <Column title="区域" dataIndex="area" key="area" />
-        <Column title="配方ID" dataIndex="formulaId" key="formulaId" />
-        <Column title="数量" dataIndex="amount" key="amount" />
+        <Column 
+          title="日期" 
+          key="date"
+          render={(record) => record.planDate || record.date}
+        />
+        <Column 
+          title="时间" 
+          key="time"
+          render={(record) => record.planTime || record.time}
+        />
+        <Column 
+          title="农场" 
+          dataIndex="area" 
+          key="area"
+          render={(text) => {
+            const farm = farmOptions.find(option => option.value === text);
+            return farm ? farm.label : text;
+          }}
+        />
+        <Column 
+          title="配方ID" 
+          key="formulaId"
+          render={(record) => record.formulaId}
+        />
+        <Column 
+          title="数量" 
+          key="quantity"
+          render={(record) => {
+            const quantity = record.amount || record.quantity;
+            return quantity ? `${quantity} kg` : '';
+          }}
+        />
         <Column
           title="状态"
           dataIndex="status"
@@ -234,11 +282,17 @@ export default function FeedPlanList() {
             <DatePicker picker="time" style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
-            name="area"
-            label="区域"
-            rules={[{ required: true, message: "请输入区域" }]}
+            name="farmId"
+            label="农场"
+            rules={[{ required: true, message: "请选择农场" }]}
           >
-            <Input placeholder="请输入区域" />
+            <Select placeholder="请选择农场">
+              {farmOptions.map(option => (
+                <Option key={option.value} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
             name="formulaId"

@@ -16,17 +16,26 @@ export default function DeviceSelect(props) {
   const [deviceList, setDeviceList] = useState([]);
   useEffect(() => {
     const getData = async () => {
-      const { data } = await apiGetAllDevice();
-      if (!data) {
+      try {
+        const response = await apiGetAllDevice();
+        const { data } = response;
+        console.log('Device list response:', response);
+        console.log('Device list data:', data);
+        if (!data) {
+          setDeviceList([]);
+          return;
+        }
+        const finalDeviceList = isFilterFarmDevice
+          ? data.filter((item) => item.farm == null || item.deviceId === value)
+          : data;
+        console.log('Final device list:', finalDeviceList);
+        setDeviceList(finalDeviceList);
+        if (showFirstDevice && finalDeviceList.length > 0) {
+          onChange(finalDeviceList[0].deviceId);
+        }
+      } catch (error) {
+        console.error('Error getting device list:', error);
         setDeviceList([]);
-        return;
-      }
-      const finalDeviceList = isFilterFarmDevice
-        ? data.filter((item) => item.farm == null || item.deviceId === value)
-        : data;
-      setDeviceList(finalDeviceList);
-      if (showFirstDevice && finalDeviceList.length > 0) {
-        onChange(finalDeviceList[0].deviceId);
       }
     };
     getData();

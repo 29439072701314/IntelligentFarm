@@ -43,8 +43,12 @@ public class EnvironmentSensorService implements IEnvironmentSensorService {
 
         // 构建查询条件
         Long deviceId = conditionUtils.getLong("deviceId");
-        long minTime = conditionUtils.getLong("minTime");
-        long maxTime = conditionUtils.getLong("maxTime");
+        Long minTimeLong = conditionUtils.getLong("minTime");
+        Long maxTimeLong = conditionUtils.getLong("maxTime");
+        
+        // 设置默认值，确保查询能够正常工作
+        long minTime = minTimeLong != null ? minTimeLong : System.currentTimeMillis() - 24 * 60 * 60 * 1000; // 默认查询过去24小时
+        long maxTime = maxTimeLong != null ? maxTimeLong : System.currentTimeMillis(); // 默认查询到当前时间
 
         // 调用 dao 层方法进行条件查询
         List<EnvironmentData> environmentDatas = environmentSensorDao.findByConditions(

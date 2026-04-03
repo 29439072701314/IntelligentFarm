@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { apiGetFarmList, apiDeleteFarm } from "@/services/farmApi";
+import { apiUnbindDeviceFromFarm } from "@/services/deviceApi";
 import ProTable from "@/component/ProTable";
 import Content from "@/component/Content";
 import { Form, Modal, Button, message } from "antd";
 import { getColumns } from "./constant";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import FarmEditModal from "./component/FarmEditModal";
+import BindDeviceModal from "./component/BindDeviceModal";
 
 const { confirm } = Modal;
 
@@ -16,6 +18,8 @@ export default function FarmList() {
   const [form] = Form.useForm();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentFarm, setCurrentFarm] = useState(null);
+  const [bindDeviceModalVisible, setBindDeviceModalVisible] = useState(false);
+  const [currentBindFarmId, setCurrentBindFarmId] = useState(null);
 
   // 搜索前处理
   const handleBeforeSearch = (values) => {
@@ -57,6 +61,35 @@ export default function FarmList() {
     navigate(`/home/livestock/livestockList?farmId=${record.farmId}`);
   };
 
+  // 绑定设备
+  const handleBindDevice = (record) => {
+    setCurrentBindFarmId(record.farmId);
+    setBindDeviceModalVisible(true);
+  };
+
+  // 绑定设备成功回调
+  const handleBindDeviceSuccess = () => {
+    setBindDeviceModalVisible(false);
+    form.getData(); // 重新加载农场列表
+  };
+
+  // 解绑设备
+  const handleUnbindDevice = (record) => {
+    confirm({
+      title: "提示",
+      content: `确认解绑农场 ${record.farmName} 的设备吗？`,
+      onOk: async () => {
+        try {
+          await apiUnbindDeviceFromFarm({ deviceId: record.deviceId });
+          message.success("解绑设备成功");
+          form.getData(); // 重新加载农场列表
+        } catch (error) {
+          message.error(error.response?.data?.message || "解绑设备失败");
+        }
+      },
+    });
+  };
+
   // 批量删除农场
   const handleBatchDelete = async () => {
     if (selectedRowKeys.length === 0) {
@@ -95,7 +128,7 @@ export default function FarmList() {
         form={form}
         api={apiGetFarmList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleEdit, handleDelete, handleViewLivestock)}
+        columns={getColumns(handleEdit, handleDelete, handleViewLivestock, handleBindDevice, handleUnbindDevice)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加
@@ -118,6 +151,12 @@ export default function FarmList() {
           form.getData();
         }}
         farm={currentFarm}
+      />
+      <BindDeviceModal
+        visible={bindDeviceModalVisible}
+        onClose={() => setBindDeviceModalVisible(false)}
+        onSuccess={handleBindDeviceSuccess}
+        farmId={currentBindFarmId}
       />
     </Content>
   );

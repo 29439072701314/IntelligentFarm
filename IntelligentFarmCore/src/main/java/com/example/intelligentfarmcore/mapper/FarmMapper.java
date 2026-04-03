@@ -14,6 +14,8 @@ public interface FarmMapper {
 
     @Mapping(target = "livestockCount", expression = "java(farm.getLivestockList() != null ? farm.getLivestockList().size() : 0)")
     @Mapping(target = "deviceCount", expression = "java(farm.getDeviceList() != null ? farm.getDeviceList().size() : 0)")
+    @Mapping(target = "deviceName", expression = "java(farm.getDeviceList() != null && !farm.getDeviceList().isEmpty() ? farm.getDeviceList().get(0).getDeviceName() : null)")
+    @Mapping(target = "deviceId", expression = "java(farm.getDeviceList() != null && !farm.getDeviceList().isEmpty() ? farm.getDeviceList().get(0).getDeviceId() : null)")
     FarmDTO toFarmDTO(Farm farm);
 
     List<FarmDTO> toFarmDTOList(List<Farm> farms);

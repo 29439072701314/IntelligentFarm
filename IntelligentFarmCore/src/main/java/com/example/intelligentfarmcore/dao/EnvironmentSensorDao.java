@@ -11,13 +11,15 @@ import java.util.List;
 @Repository
 public interface EnvironmentSensorDao extends JpaRepository<EnvironmentData, Long> {
         // 查询数据列表（没有分页）
-        @Query("SELECT d FROM EnvironmentData d WHERE " +
-                        "(:deviceId IS NULL OR d.deviceId = :deviceId) " +
-                        "AND d.time >= :minTime " +
-                        "AND d.time <= :maxTime " +
-                        "ORDER BY d.time ASC")
-        List<EnvironmentData> findByConditions(
-                        @Param("deviceId") Long deviceId,
-                        @Param("minTime") long minTime,
-                        @Param("maxTime") long maxTime);
+    @Query("SELECT d FROM EnvironmentData d WHERE " +
+                    "(:deviceId IS NULL OR d.deviceId = :deviceId) " +
+                    "AND d.time >= :minTime " +
+                    "AND d.time <= :maxTime " +
+                    "AND d.temperature >= 12 " +
+                    "AND d.temperature <= 20 " +
+                    "ORDER BY d.time ASC")
+    List<EnvironmentData> findByConditions(
+                    @Param("deviceId") Long deviceId,
+                    @Param("minTime") long minTime,
+                    @Param("maxTime") long maxTime);
 }

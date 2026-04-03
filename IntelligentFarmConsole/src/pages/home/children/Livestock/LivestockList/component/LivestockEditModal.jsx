@@ -14,7 +14,8 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
         form.setFieldsValue({
           livestockName: livestock.livestockName,
           livestockType: livestock.livestockType,
-          healthStatus: livestock.healthStatus || "健康"
+          healthStatus: livestock.healthStatus || "健康",
+          farmId: livestock.farmId
         });
       } else {
         form.resetFields();
@@ -88,6 +89,12 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
             <Option value="患病">患病</Option>
             <Option value="治疗中">治疗中</Option>
           </Select>
+        </Form.Item>
+        <Form.Item
+          name="farmId"
+          hidden
+        >
+          <Input />
         </Form.Item>
       </Form>
     </Modal>

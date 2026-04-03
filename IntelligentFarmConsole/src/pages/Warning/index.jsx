@@ -28,7 +28,7 @@ const WarningPage = () => {
   useEffect(() => {
     fetchWarnings();
     fetchStatistics();
-    // connectWebSocket();
+    connectWebSocket();
 
     return () => {
       if (stompClient) {
@@ -89,27 +89,27 @@ const WarningPage = () => {
     }
   };
 
-  // const connectWebSocket = () => {
-  //   try {
-  //     const socket = new SockJS("/api/ws");
-  //     const client = Stomp.over(socket);
-  //     client.connect({}, () => {
-  //       client.subscribe("/topic/warnings", (message) => {
-  //         const newWarning = JSON.parse(message.body);
-  //         notification.info({
-  //           message: "新告警",
-  //           description: `类型: ${newWarning.type}, 来源: ${newWarning.source}, 详情: ${newWarning.details}`,
-  //           placement: "topRight"
-  //         });
-  //         fetchWarnings();
-  //         fetchStatistics();
-  //       });
-  //     });
-  //     setStompClient(client);
-  //   } catch (error) {
-  //     console.error("WebSocket 连接失败:", error);
-  //   }
-  // };
+  const connectWebSocket = () => {
+    try {
+      const socket = new SockJS("/api/ws");
+      const client = Stomp.over(socket);
+      client.connect({}, () => {
+        client.subscribe("/topic/warnings", (message) => {
+          const newWarning = JSON.parse(message.body);
+          notification.info({
+            message: "新告警",
+            description: `类型: ${newWarning.type}, 来源: ${newWarning.source}, 详情: ${newWarning.details}`,
+            placement: "topRight"
+          });
+          fetchWarnings();
+          fetchStatistics();
+        });
+      });
+      setStompClient(client);
+    } catch (error) {
+      console.error("WebSocket 连接失败:", error);
+    }
+  };
 
   const handleWarning = async (id) => {
     try {

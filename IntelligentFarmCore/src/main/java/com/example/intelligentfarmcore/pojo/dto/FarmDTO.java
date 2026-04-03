@@ -9,6 +9,8 @@ public class FarmDTO {
     private Long userId;
     private Integer livestockCount;
     private Integer deviceCount;
+    private String deviceName;
+    private Long deviceId;
 
     public FarmDTO() {
     }
@@ -20,6 +22,8 @@ public class FarmDTO {
         this.userId = farm.getUserId();
         this.livestockCount = farm.getLivestockList() != null ? farm.getLivestockList().size() : 0;
         this.deviceCount = farm.getDeviceList() != null ? farm.getDeviceList().size() : 0;
+        this.deviceName = farm.getDeviceList() != null && !farm.getDeviceList().isEmpty() ? farm.getDeviceList().get(0).getDeviceName() : null;
+        this.deviceId = farm.getDeviceList() != null && !farm.getDeviceList().isEmpty() ? farm.getDeviceList().get(0).getDeviceId() : null;
     }
 
     public Long getFarmId() {
@@ -68,5 +72,21 @@ public class FarmDTO {
 
     public void setDeviceCount(Integer deviceCount) {
         this.deviceCount = deviceCount;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
     }
 }
