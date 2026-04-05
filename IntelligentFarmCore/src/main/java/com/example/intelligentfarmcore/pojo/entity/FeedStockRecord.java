@@ -1,5 +1,6 @@
 package com.example.intelligentfarmcore.pojo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -29,6 +30,7 @@ public class FeedStockRecord {
     private String remark;
 
     // 关联的饲料配方
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "formula_id", insertable = false, updatable = false)
     private FeedFormula feedFormula;

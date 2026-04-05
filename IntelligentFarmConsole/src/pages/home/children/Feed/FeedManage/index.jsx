@@ -4,6 +4,7 @@ import Content from "@/component/Content";
 import { PlusOutlined } from "@ant-design/icons";
 import FeedFormulaList from "./FeedFormulaList";
 import FeedPlanList from "./FeedPlanList";
+import FeedStockList from "./FeedStockList";
 
 const { TabPane } = Tabs;
 
@@ -22,6 +23,9 @@ export default function FeedManage() {
         </TabPane>
         <TabPane tab="投喂计划" key="plan">
           <FeedPlanList />
+        </TabPane>
+        <TabPane tab="库存记录" key="stock">
+          <FeedStockList />
         </TabPane>
       </Tabs>
     </Content>
