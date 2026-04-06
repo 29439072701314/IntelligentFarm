@@ -130,13 +130,13 @@ public class FeedPlanService implements IFeedPlanService {
             return ResponseMessage.error("配方不存在");
         }
 
-        // 检查库存是否足够
-        if (formula.getStock() < plan.getQuantity()) {
+        // 检查库存是否足够（库存单位是吨，计划单位是kg，需要转换）
+        if (formula.getStock() * 1000 < plan.getQuantity()) {
             return ResponseMessage.error("库存不足，无法执行计划");
         }
 
-        // 扣减库存
-        formula.setStock(formula.getStock() - plan.getQuantity());
+        // 扣减库存（将kg转换为吨）
+        formula.setStock(formula.getStock() - plan.getQuantity() / 1000);
         feedFormulaDao.save(formula);
 
         // 更新计划状态为已完成

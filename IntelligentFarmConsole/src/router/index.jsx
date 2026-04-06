@@ -20,6 +20,8 @@ import Device from "../pages/home/children/Device";
 import DataCenter from "../pages/home/children/DataCenter";
 import FarmList from "../pages/home/children/Farm/FarmList";
 import LivestockList from "../pages/home/children/Livestock/LivestockList";
+import LivestockWeightChart from "../pages/home/children/Livestock/LivestockWeightChart";
+import LivestockRecordList from "../pages/home/children/Livestock/LivestockRecordList";
 import FeedManage from "../pages/home/children/Feed/FeedManage";
 import DiseaseManage from "../pages/home/children/Disease/DiseaseManage";
 import Warning from "../pages/Warning";
@@ -57,20 +59,32 @@ export const publicMenuRoutes = [
     ],
   },
   {
-    label: "牲畜管理",
-    key: "livestock",
-    icon: <HomeOutlined />,
-    path: "livestock",
-    permission: ["admin", "farmer"],
-    children: [
-      {
-        label: <NavLink to="/home/livestock/livestockList">牲畜列表</NavLink>,
-        key: "livestockList",
-        path: "livestockList",
-        element: <LivestockList />,
-      },
-    ],
-  },
+      label: "牲畜管理",
+      key: "livestock",
+      icon: <HomeOutlined />,
+      path: "livestock",
+      permission: ["admin", "farmer"],
+      children: [
+        {
+          label: <NavLink to="/home/livestock/livestockList">牲畜列表</NavLink>,
+          key: "livestockList",
+          path: "livestockList",
+          element: <LivestockList />,
+        },
+        {
+          label: <NavLink to="/home/livestock/weightChart">牲畜数据展示</NavLink>,
+          key: "weightChart",
+          path: "weightChart",
+          element: <LivestockWeightChart />,
+        },
+        {
+          label: <NavLink to="/home/livestock/recordList">出入库记录</NavLink>,
+          key: "recordList",
+          path: "recordList",
+          element: <LivestockRecordList />,
+        },
+      ],
+    },
   {
     label: "饲料管理",
     key: "feed",

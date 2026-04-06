@@ -42,4 +42,16 @@ public class LivestockController {
     public ResponseMessage<?> getLivestockDetail(@PathVariable("id") Long id) {
         return livestockService.getLivestockDetail(id);
     }
+
+    // 牲畜入库
+    @PostMapping("/{id}/inStock")
+    public ResponseMessage<?> inStock(@PathVariable("id") Long id, @RequestParam String operator, @RequestParam(required = false) String remark) {
+        return livestockService.inStock(id, operator, remark);
+    }
+
+    // 牲畜出库
+    @PostMapping("/{id}/outStock")
+    public ResponseMessage<?> outStock(@PathVariable("id") Long id, @RequestParam String operator, @RequestParam(required = false) String remark) {
+        return livestockService.outStock(id, operator, remark);
+    }
 }

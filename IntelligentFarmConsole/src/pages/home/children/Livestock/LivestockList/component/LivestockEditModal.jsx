@@ -3,21 +3,26 @@ import { Modal, Form, Input, Button, message, Select } from "antd";
 
 const { Option } = Select;
 import { apiAddLivestock, apiEditLivestock } from "@/services/livestockApi";
+import { apiAddWeightRecord } from "@/services/livestockWeightApi";
 
 export default function LivestockEditModal({ visible, onClose, onSuccess, livestock, farmId }) {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [oldWeight, setOldWeight] = useState(null);
 
   useEffect(() => {
     if (visible) {
       if (livestock) {
+        setOldWeight(livestock.weight);
         form.setFieldsValue({
           livestockName: livestock.livestockName,
           livestockType: livestock.livestockType,
           healthStatus: livestock.healthStatus || "健康",
+          weight: livestock.weight,
           farmId: livestock.farmId
         });
       } else {
+        setOldWeight(null);
         form.resetFields();
       }
     }
@@ -27,9 +32,27 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
     setLoading(true);
     try {
       if (livestock) {
+        // 编辑牲畜
         await apiEditLivestock(livestock.livestockId, values);
+        
+        // 如果体重发生变化，添加体重记录
+        if (values.weight !== oldWeight) {
+          await apiAddWeightRecord({
+            livestockId: livestock.livestockId,
+            weight: values.weight
+          });
+        }
       } else {
-        await apiAddLivestock({ ...values, farmId });
+        // 新增牲畜
+        const result = await apiAddLivestock({ ...values, farmId });
+        
+        // 如果有体重值，添加体重记录
+        if (values.weight) {
+          await apiAddWeightRecord({
+            livestockId: result.data.livestockId,
+            weight: values.weight
+          });
+        }
       }
       message.success(livestock ? "编辑成功" : "新增成功");
       onSuccess();
@@ -77,6 +100,13 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
           rules={[{ required: true, message: "请输入牲畜类型" }]}
         >
           <Input placeholder="请输入牲畜类型" />
+        </Form.Item>
+        <Form.Item
+          name="weight"
+          label="体重 (kg)"
+          rules={[{ required: false, message: "请输入体重" }]}
+        >
+          <Input type="number" placeholder="请输入体重" step="0.1" />
         </Form.Item>
         <Form.Item
           name="healthStatus"

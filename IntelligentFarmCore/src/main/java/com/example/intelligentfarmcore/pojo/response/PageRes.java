@@ -38,6 +38,18 @@ public class PageRes<T> {
     public PageRes(List<T> content, int total) {
         this.total = (long) total;
         this.content = content;
+        // 设置默认值
+        this.pageNumber = 1;
+        this.pageSize = content.size();
+        this.totalPages = (total + content.size() - 1) / content.size();
+    }
+    
+    public PageRes(List<T> content, int total, int pageNumber, int pageSize, int totalPages) {
+        this.total = (long) total;
+        this.content = content;
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
+        this.totalPages = totalPages;
     }
 
     public Long getTotal() {

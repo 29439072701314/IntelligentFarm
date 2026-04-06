@@ -16,8 +16,15 @@ public interface ILivestockService {
     // 编辑牲畜
     ResponseMessage<Livestock> editLivestock(Livestock livestock);
 
-
-
     // 获取牲畜详情
     ResponseMessage<Livestock> getLivestockDetail(Long livestockId);
+
+    // 根据农场ID获取牲畜列表
+    java.util.List<Livestock> getLivestockByFarmId(Long farmId);
+
+    // 牲畜入库
+    ResponseMessage<Livestock> inStock(Long livestockId, String operator, String remark);
+
+    // 牲畜出库
+    ResponseMessage<Livestock> outStock(Long livestockId, String operator, String remark);
 }

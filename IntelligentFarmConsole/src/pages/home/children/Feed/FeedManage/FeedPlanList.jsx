@@ -199,7 +199,7 @@ export default function FeedPlanList() {
           dataIndex="area" 
           key="area"
           render={(text) => {
-            const farm = farmOptions.find(option => option.value === text);
+            const farm = farmOptions.find(option => option.value.toString() === text.toString());
             return farm ? farm.label : text;
           }}
         />

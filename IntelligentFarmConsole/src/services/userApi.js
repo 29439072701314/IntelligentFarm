@@ -20,3 +20,6 @@ export const apiGetUserListByIds = (data) => post("/api/user/listByIds", data);
 
 // 审核用户
 export const apiApproveUser = (data) => post("/api/user/approve", data);
+
+// 禁用/启用用户
+export const apiDisableUser = (data) => post("/api/user/disable", data);

@@ -1,5 +1,6 @@
 package com.example.intelligentfarmcore.pojo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -53,6 +54,7 @@ public class Livestock {
     private String livestockType;
 
     // 关联的农场
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "farm_id", insertable = false, updatable = false)
     private Farm farm;

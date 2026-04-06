@@ -24,13 +24,26 @@ public class LivestockDTO {
         this.farmId = livestock.getFarmId();
         this.healthStatus = livestock.getHealthStatus();
         this.inTime = livestock.getInTime();
-        this.livestockCode = livestock.getLivestockCode();
+        // 确保livestockCode是字符串
+        String code = livestock.getLivestockCode();
+        this.livestockCode = code != null ? code : "";
         this.outTime = livestock.getOutTime();
         this.status = livestock.getStatus();
         this.type = livestock.getType();
         this.weight = livestock.getWeight();
         this.livestockName = livestock.getLivestockName();
         this.livestockType = livestock.getLivestockType();
+        // 确保type和livestockType字段都设置，保持兼容性
+        if (this.livestockType == null && this.type != null) {
+            this.livestockType = this.type;
+        }
+        if (this.type == null && this.livestockType != null) {
+            this.type = this.livestockType;
+        }
+        // 确保status不为null
+        if (this.status == null) {
+            this.status = 1;
+        }
     }
 
     public Long getLivestockId() {

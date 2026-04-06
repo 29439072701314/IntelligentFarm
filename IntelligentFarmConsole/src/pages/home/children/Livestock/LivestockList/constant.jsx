@@ -1,22 +1,37 @@
 import React from 'react';
-import { Button, Input, Tag, DatePicker } from 'antd';
-import { EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { Button, Input, Tag, DatePicker, Modal, Form } from 'antd';
+import { EditOutlined, EyeOutlined, InboxOutlined, ExportOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
-export const getColumns = (handleEdit, handleDelete, handleDetail) => {
+export const getColumns = (handleEdit, handleDelete, handleDetail, handleInStock, handleOutStock) => {
   return [
     {
       title: "牲畜编码",
       dataIndex: "livestockCode",
       key: "livestockCode",
+      render: (text) => {
+        if (text && typeof text === 'string') {
+          // 确保显示的是纯字符串
+          return text.trim();
+        }
+        return text || '-';
+      },
       formItemProps: {
         render: () => <Input placeholder="请输入牲畜编码" />,
       },
     },
     {
+      title: "牲畜名称",
+      dataIndex: "livestockName",
+      key: "livestockName",
+      formItemProps: {
+        render: () => <Input placeholder="请输入牲畜名称" />,
+      },
+    },
+    {
       title: "牲畜类型",
-      dataIndex: "type",
-      key: "type",
+      dataIndex: "livestockType",
+      key: "livestockType",
       formItemProps: {
         render: () => <Input placeholder="请输入牲畜类型" />,
       },
@@ -48,32 +63,59 @@ export const getColumns = (handleEdit, handleDelete, handleDetail) => {
       title: "入场时间",
       dataIndex: "inTime",
       key: "inTime",
-      render: (text) => text ? new Date(text).toLocaleString() : '-',
+      render: (text) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
       formItemProps: {
         render: false,
       },
     },
     {
+      title: "状态",
+      dataIndex: "status",
+      key: "status",
+      render: (text) => {
+        let color = 'green';
+        let statusText = '在库';
+        const statusValue = typeof text === 'string' ? parseInt(text) : text;
+        if (statusValue === 2) {
+          color = 'red';
+          statusText = '已出库';
+        }
+        return <Tag color={color}>{statusText}</Tag>;
+      },
+    },
+    {
       title: "操作",
       key: "action",
-      render: (_, record) => (
-        <div>
-          <Button
-            type="link"
-            icon={<EyeOutlined />}
-            onClick={() => handleDetail(record)}
-          >
-            详情
-          </Button>
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            编辑
-          </Button>
-        </div>
-      ),
+      render: (_, record) => {
+        const statusValue = typeof record.status === 'string' ? parseInt(record.status) : record.status;
+        return (
+          <div>
+            <Button
+              type="link"
+              icon={<EyeOutlined />}
+              onClick={() => handleDetail(record)}
+            >
+              详情
+            </Button>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            >
+              编辑
+            </Button>
+            {statusValue === 1 && (
+              <Button
+                type="link"
+                icon={<ExportOutlined />}
+                onClick={() => handleOutStock(record)}
+              >
+                出库
+              </Button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 };

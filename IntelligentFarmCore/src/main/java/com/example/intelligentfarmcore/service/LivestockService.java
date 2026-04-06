@@ -4,11 +4,15 @@ import com.example.intelligentfarmcore.dao.LivestockDao;
 import com.example.intelligentfarmcore.mapper.LivestockMapper;
 import com.example.intelligentfarmcore.pojo.dto.LivestockDTO;
 import com.example.intelligentfarmcore.pojo.entity.Livestock;
+import com.example.intelligentfarmcore.pojo.entity.LivestockWeightRecord;
 import com.example.intelligentfarmcore.pojo.model.ResponseMessage;
 import com.example.intelligentfarmcore.pojo.request.PageReq;
 import com.example.intelligentfarmcore.pojo.response.PageRes;
 import com.example.intelligentfarmcore.service.interfaces.ILivestockService;
+import com.example.intelligentfarmcore.service.interfaces.ILivestockRecordService;
+import com.example.intelligentfarmcore.service.interfaces.ILivestockWeightRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -87,19 +91,73 @@ public class LivestockService implements ILivestockService {
             }
             totalPages = (livestockList.size() + pageSize - 1) / pageSize;
         }
-        List<LivestockDTO> livestockDTOs = LivestockMapper.INSTANCE.toLivestockDTOList(pageLivestock);
-        PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size());
+        // 手动转换，确保所有字段都正确设置
+        List<LivestockDTO> livestockDTOs = pageLivestock.stream()
+            .map(LivestockDTO::new)
+            .toList();
+        PageRes<LivestockDTO> pageRes = new PageRes<>(livestockDTOs, livestockList.size(), pageNumber, pageSize, totalPages);
         return ResponseMessage.success(pageRes);
     }
 
     @Transactional
     @Override
     public ResponseMessage<Livestock> addLivestock(Livestock livestock) {
+        // 设置默认状态为在库
+        livestock.setStatus(1);
+        // 设置入库时间
+        livestock.setInTime(java.time.LocalDateTime.now());
+        // 生成牲畜编码 - 使用农场代码+序号格式
+        if (livestock.getLivestockCode() == null || livestock.getLivestockCode().trim().isEmpty()) {
+            // 从farmId生成前缀
+            String prefix = "F" + livestock.getFarmId();
+            // 查询该农场的最大序号
+            List<Livestock> existingLivestock = livestockDao.findByFarmId(livestock.getFarmId());
+            int maxSeq = 0;
+            for (Livestock existing : existingLivestock) {
+                String existingCode = existing.getLivestockCode();
+                if (existingCode != null && existingCode.startsWith(prefix + "_S")) {
+                    try {
+                        String seqStr = existingCode.substring((prefix + "_S").length());
+                        int seq = Integer.parseInt(seqStr);
+                        if (seq > maxSeq) {
+                            maxSeq = seq;
+                        }
+                    } catch (Exception e) {
+                        // 忽略格式不正确的编码
+                    }
+                }
+            }
+            // 生成新序号
+            int newSeq = maxSeq + 1;
+            String code = prefix + "_S" + String.format("%03d", newSeq);
+            livestock.setLivestockCode(code);
+        }
+        // 确保type和livestockType字段都设置，保持兼容性
+        if (livestock.getLivestockType() != null && livestock.getType() == null) {
+            livestock.setType(livestock.getLivestockType());
+        }
+        if (livestock.getType() != null && livestock.getLivestockType() == null) {
+            livestock.setLivestockType(livestock.getType());
+        }
         // 保存牲畜
         Livestock savedLivestock = livestockDao.save(livestock);
         
+        // 强制刷新，确保从数据库重新获取
+        livestockDao.flush();
+        savedLivestock = livestockDao.findById(savedLivestock.getLivestockId()).orElse(null);
+        
         // 检查健康状态，如果不健康，自动创建疾病记录
         checkHealthStatusAndCreateDiseaseRecord(savedLivestock);
+        
+        // 添加入库记录
+        com.example.intelligentfarmcore.pojo.entity.LivestockRecord record = new com.example.intelligentfarmcore.pojo.entity.LivestockRecord();
+        record.setFarmId(livestock.getFarmId());
+        record.setLivestockId(savedLivestock.getLivestockId());
+        record.setOperationType(1); // 1-入库
+        record.setOperationTime(java.time.LocalDateTime.now());
+        record.setOperator("系统");
+        record.setRemark("初始入库");
+        livestockRecordService.addRecord(record);
         
         return ResponseMessage.success(savedLivestock, "新增牲畜成功");
     }
@@ -113,16 +171,26 @@ public class LivestockService implements ILivestockService {
             return ResponseMessage.error("牲畜不存在");
         }
         
-        // 保存旧的健康状态
+        // 保存旧的健康状态和体重
         String oldHealthStatus = existingLivestock.getHealthStatus();
+        Double oldWeight = existingLivestock.getWeight();
         
         // 更新牲畜信息
         existingLivestock.setLivestockName(livestock.getLivestockName());
         existingLivestock.setLivestockType(livestock.getLivestockType());
         existingLivestock.setFarmId(livestock.getFarmId());
         existingLivestock.setHealthStatus(livestock.getHealthStatus());
+        existingLivestock.setWeight(livestock.getWeight());
         
         Livestock updatedLivestock = livestockDao.save(existingLivestock);
+        
+        // 如果体重发生变化，创建体重记录
+        if (oldWeight == null || !oldWeight.equals(updatedLivestock.getWeight())) {
+            LivestockWeightRecord weightRecord = new LivestockWeightRecord();
+            weightRecord.setLivestockId(updatedLivestock.getLivestockId());
+            weightRecord.setWeight(updatedLivestock.getWeight());
+            livestockWeightRecordService.addRecord(weightRecord);
+        }
         
         // 如果健康状态变为不健康，自动创建疾病记录
         if (!"健康".equals(updatedLivestock.getHealthStatus())) {
@@ -149,6 +217,14 @@ public class LivestockService implements ILivestockService {
     
     @Autowired
     private WarningService warningService;
+    
+    @Autowired
+    @Lazy
+    private ILivestockWeightRecordService livestockWeightRecordService;
+
+    @Autowired
+    @Lazy
+    private ILivestockRecordService livestockRecordService;
 
     // 检查健康状态并自动创建疾病记录
     private void checkHealthStatusAndCreateDiseaseRecord(Livestock livestock) {
@@ -199,5 +275,65 @@ public class LivestockService implements ILivestockService {
             default:
                 break;
         }
+    }
+
+    @Override
+    public java.util.List<Livestock> getLivestockByFarmId(Long farmId) {
+        return livestockDao.findByFarmId(farmId);
+    }
+
+    @Transactional
+    @Override
+    public ResponseMessage<Livestock> inStock(Long livestockId, String operator, String remark) {
+        // 检查牲畜是否存在
+        Livestock livestock = livestockDao.findById(livestockId).orElse(null);
+        if (livestock == null) {
+            return ResponseMessage.error("牲畜不存在");
+        }
+
+        // 设置牲畜状态为在库
+        livestock.setStatus(1);
+        livestock.setInTime(java.time.LocalDateTime.now());
+        livestock.setOutTime(null);
+        Livestock updatedLivestock = livestockDao.save(livestock);
+
+        // 添加入库记录
+        com.example.intelligentfarmcore.pojo.entity.LivestockRecord record = new com.example.intelligentfarmcore.pojo.entity.LivestockRecord();
+        record.setFarmId(livestock.getFarmId());
+        record.setLivestockId(livestockId);
+        record.setOperationType(1); // 1-入库
+        record.setOperationTime(java.time.LocalDateTime.now());
+        record.setOperator(operator);
+        record.setRemark(remark);
+        livestockRecordService.addRecord(record);
+
+        return ResponseMessage.success(updatedLivestock, "入库成功");
+    }
+
+    @Transactional
+    @Override
+    public ResponseMessage<Livestock> outStock(Long livestockId, String operator, String remark) {
+        // 检查牲畜是否存在
+        Livestock livestock = livestockDao.findById(livestockId).orElse(null);
+        if (livestock == null) {
+            return ResponseMessage.error("牲畜不存在");
+        }
+
+        // 设置牲畜状态为已出库
+        livestock.setStatus(2);
+        livestock.setOutTime(java.time.LocalDateTime.now());
+        Livestock updatedLivestock = livestockDao.save(livestock);
+
+        // 添加出库记录
+        com.example.intelligentfarmcore.pojo.entity.LivestockRecord record = new com.example.intelligentfarmcore.pojo.entity.LivestockRecord();
+        record.setFarmId(livestock.getFarmId());
+        record.setLivestockId(livestockId);
+        record.setOperationType(2); // 2-出库
+        record.setOperationTime(java.time.LocalDateTime.now());
+        record.setOperator(operator);
+        record.setRemark(remark);
+        livestockRecordService.addRecord(record);
+
+        return ResponseMessage.success(updatedLivestock, "出库成功");
     }
 }

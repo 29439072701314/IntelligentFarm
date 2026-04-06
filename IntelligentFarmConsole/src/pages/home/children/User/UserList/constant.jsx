@@ -8,7 +8,7 @@ import RoleTag from "../../../../../component/RoleTag";
 import GenderTag from "../../../../../component/GenderTag";
 import { GAP, ROLE } from "../../../../../constant";
 const { RangePicker } = DatePicker;
-export const getColumns = (handleDelete, handleApprove) => [
+export const getColumns = (handleDelete, handleApprove, handleDisable) => [
   {
     title: "头像",
     dataIndex: "avatar",
@@ -92,6 +92,8 @@ export const getColumns = (handleDelete, handleApprove) => [
         return <span style={{ color: '#FF9800' }}>待审核</span>;
       } else if (status === 1) {
         return <span style={{ color: '#4CAF50' }}>已审核</span>;
+      } else if (status === 2) {
+        return <span style={{ color: '#F44336' }}>已禁用</span>;
       } else {
         return <span>未知</span>;
       }
@@ -108,6 +110,15 @@ export const getColumns = (handleDelete, handleApprove) => [
             onClick={() => handleApprove(record, 1)}
           >
             审核通过
+          </Button>
+        )}
+        {record.role.roleId !== ROLE.ADMIN && record.status !== 0 && (
+          <Button
+            type={record.status === 1 ? "primary" : "default"}
+            danger={record.status === 1}
+            onClick={() => handleDisable(record)}
+          >
+            {record.status === 1 ? "禁用" : "启用"}
           </Button>
         )}
         <Button

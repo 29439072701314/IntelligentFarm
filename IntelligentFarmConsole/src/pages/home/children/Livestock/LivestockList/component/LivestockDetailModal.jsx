@@ -82,7 +82,7 @@ export default function LivestockDetailModal({ visible, onClose, livestockId }) 
             {livestockDetail.weight}
           </Descriptions.Item>
           <Descriptions.Item label="状态">
-            {livestockDetail.status === 0 ? '在栏' : '出栏'}
+            {livestockDetail.status === 1 ? '在栏' : '出栏'}
           </Descriptions.Item>
           <Descriptions.Item label="入场时间" span={2}>
             {livestockDetail.inTime ? new Date(livestockDetail.inTime).toLocaleString() : '-'}

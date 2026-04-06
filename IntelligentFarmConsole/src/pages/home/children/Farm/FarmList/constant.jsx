@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button, Input } from 'antd';
-import { EditOutlined, DeleteOutlined, FieldTimeOutlined, ReloadOutlined, UnlockOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, FieldTimeOutlined, ReloadOutlined, UnlockOutlined, FullscreenOutlined } from '@ant-design/icons';
 
-export const getColumns = (handleEdit, handleDelete, handleViewLivestock, handleBindDevice, handleUnbindDevice) => {
+export const getColumns = (handleEdit, handleDelete, handleViewLivestock, handleBindDevice, handleUnbindDevice, handleFeed) => {
   return [
     {
       title: '农场名称',
@@ -79,6 +79,13 @@ export const getColumns = (handleEdit, handleDelete, handleViewLivestock, handle
             onClick={() => handleEdit(record)}
           >
             编辑
+          </Button>
+          <Button
+            type="link"
+            icon={<FullscreenOutlined />}
+            onClick={() => handleFeed(record)}
+          >
+            一键喂养
           </Button>
           <Button
             type="link"

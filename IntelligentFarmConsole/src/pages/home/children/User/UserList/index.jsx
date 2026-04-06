@@ -8,6 +8,7 @@ import {
   apiDeleteUser,
   apiDeleteUserBatch,
   apiApproveUser,
+  apiDisableUser,
 } from "../../../../../services/userApi";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -70,6 +71,19 @@ export default function UserList() {
       },
     });
   };
+
+  // 禁用/启用用户
+  const handleDisable = async (record) => {
+    const action = record.status === 1 ? "禁用" : "启用";
+    confirm({
+      title: "提示",
+      content: `确认${action}用户 ${record.userName} 吗？`,
+      onOk: async () => {
+        await apiApproveUser({ userId: record.userId, status: record.status === 1 ? 2 : 1 });
+        form.getData();
+      },
+    });
+  };
   return (
     <Content title="用户列表">
       <ProTable
@@ -91,7 +105,7 @@ export default function UserList() {
         form={form}
         api={apiGetUserList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleDelete, handleApprove)}
+        columns={getColumns(handleDelete, handleApprove, handleDisable)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加

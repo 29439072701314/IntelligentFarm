@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { apiGetFarmList, apiDeleteFarm } from "@/services/farmApi";
 import { apiUnbindDeviceFromFarm } from "@/services/deviceApi";
+import { apiGetPlanList, apiExecutePlan } from "@/services/feedApi";
 import ProTable from "@/component/ProTable";
 import Content from "@/component/Content";
-import { Form, Modal, Button, message } from "antd";
+import { Form, Modal, Button, message, notification } from "antd";
 import { getColumns } from "./constant";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import FarmEditModal from "./component/FarmEditModal";
@@ -90,6 +91,56 @@ export default function FarmList() {
     });
   };
 
+  // 一键喂养
+  const handleFeed = async (record) => {
+    try {
+      // 获取当前农场的待执行投喂计划
+      const res = await apiGetPlanList({ pageNumber: 1, pageSize: 100 });
+      const plans = res.data.content || res.data.list || [];
+      const farmPlans = plans.filter(plan => 
+        plan.area.toString() === record.farmId.toString() && plan.status === "待执行"
+      );
+
+      if (farmPlans.length === 0) {
+        message.info(`农场 ${record.farmName} 没有待执行的投喂计划`);
+        return;
+      }
+
+      // 执行所有待执行的计划
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const plan of farmPlans) {
+        try {
+          const result = await apiExecutePlan(plan.id);
+          // 检查执行结果是否成功
+          if (result.code === 200) {
+            successCount++;
+          } else {
+            failCount++;
+            console.error(`执行计划 ${plan.id} 失败:`, result.message);
+          }
+        } catch (error) {
+          failCount++;
+          console.error(`执行计划 ${plan.id} 失败:`, error);
+        }
+      }
+
+      // 显示执行结果
+      if (successCount > 0 || failCount > 0) {
+        const type = failCount === 0 ? "success" : "warning";
+        notification[type]({
+          message: "喂养执行结果",
+          description: `农场 ${record.farmName} 共执行 ${farmPlans.length} 个投喂计划，成功 ${successCount} 个，失败 ${failCount} 个`,
+          duration: 5,
+        });
+      }
+
+    } catch (error) {
+      message.error(error.response?.data?.message || "获取投喂计划失败");
+    }
+  };
+
   // 批量删除农场
   const handleBatchDelete = async () => {
     if (selectedRowKeys.length === 0) {
@@ -128,7 +179,7 @@ export default function FarmList() {
         form={form}
         api={apiGetFarmList}
         beforeSearch={handleBeforeSearch}
-        columns={getColumns(handleEdit, handleDelete, handleViewLivestock, handleBindDevice, handleUnbindDevice)}
+        columns={getColumns(handleEdit, handleDelete, handleViewLivestock, handleBindDevice, handleUnbindDevice, handleFeed)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
             添加
