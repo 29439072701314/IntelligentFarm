@@ -22,7 +22,9 @@ import FarmList from "../pages/home/children/Farm/FarmList";
 import LivestockList from "../pages/home/children/Livestock/LivestockList";
 import LivestockWeightChart from "../pages/home/children/Livestock/LivestockWeightChart";
 import LivestockRecordList from "../pages/home/children/Livestock/LivestockRecordList";
-import FeedManage from "../pages/home/children/Feed/FeedManage";
+import FeedFormulaList from "../pages/home/children/Feed/FeedManage/FeedFormulaList";
+import FeedPlanList from "../pages/home/children/Feed/FeedManage/FeedPlanList";
+import FeedStockList from "../pages/home/children/Feed/FeedManage/FeedStockList";
 import DiseaseManage from "../pages/home/children/Disease/DiseaseManage";
 import Warning from "../pages/Warning";
 
@@ -93,10 +95,22 @@ export const publicMenuRoutes = [
     permission: ["admin", "farmer"],
     children: [
       {
-        label: <NavLink to="/home/feed/feedManage">饲料管理</NavLink>,
-        key: "feedManage",
-        path: "feedManage",
-        element: <FeedManage />,
+        label: <NavLink to="/home/feed/feedFormulaList">饲料配方</NavLink>,
+        key: "feedFormulaList",
+        path: "feedFormulaList",
+        element: <FeedFormulaList />,
+      },
+      {
+        label: <NavLink to="/home/feed/feedPlanList">投喂计划</NavLink>,
+        key: "feedPlanList",
+        path: "feedPlanList",
+        element: <FeedPlanList />,
+      },
+      {
+        label: <NavLink to="/home/feed/feedStockList">库存记录</NavLink>,
+        key: "feedStockList",
+        path: "feedStockList",
+        element: <FeedStockList />,
       },
     ],
   },

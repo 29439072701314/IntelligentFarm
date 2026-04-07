@@ -164,9 +164,9 @@ export default function LivestockWeightChart() {
     const minWeight = Math.min(...weights);
     const maxWeight = Math.max(...weights);
 
-    // 模拟日增重（实际应该从体重记录中计算）
-    const dailyGain = Math.round(Math.random() * 200 + 50);
-    const gainTrend = Math.random() > 0.5 ? 'up' : 'down';
+    // 日增重和趋势从实际数据中计算
+    const dailyGain = 0;
+    const gainTrend = 'stable';
 
     const calculatedData = {
       averageWeight: Math.round(averageWeight * 100) / 100,

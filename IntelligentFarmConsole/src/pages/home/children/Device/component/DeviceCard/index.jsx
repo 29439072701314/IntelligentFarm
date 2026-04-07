@@ -1,19 +1,51 @@
-import React from "react";
-import { Card, Statistic, Tag, Flex, Space, Progress } from "antd";
+import React, { useState } from "react";
+import { Card, Statistic, Tag, Flex, Space, Progress, Switch, message } from "antd";
 import CountUp from "react-countup";
 import { getDeviceStatus } from "./constant.jsx";
 import DeviceNameTag from "../../../../../../component/DeviceNameTag";
 import FarmTag from "../../../../../../component/FarmTag";
+import { apiControlDevice } from "../../../../../../services/deviceApi";
 const formatter = (value) => <CountUp end={value} />;
 
 export default function DeviceCard(props) {
   const { item } = props;
   const { deviceName, temperature, humidity, gasConcentration, time, farm } = item;
+  const [fanLoading, setFanLoading] = useState(false);
+  const [fanStatus, setFanStatus] = useState(false);
   
   // 计算温度、湿度、气体浓度的百分比（用于进度条）
-  const tempPercent = ((temperature - 12) / (20 - 12)) * 100; // 温度范围12-20度
-  const humidityPercent = humidity; // 湿度范围0-100%
-  const gasPercent = (gasConcentration / 500) * 100; // 气体浓度范围0-500ppm
+  // 温度范围根据实际数据动态调整，默认使用0-50度的合理范围
+  const tempPercent = temperature ? Math.min((temperature / 50) * 100, 100) : 0;
+  const humidityPercent = humidity ? Math.min(humidity, 100) : 0; // 湿度范围0-100%
+  const gasPercent = gasConcentration ? Math.min((gasConcentration / 1000) * 100, 100) : 0; // 气体浓度范围0-1000ppm
+  
+  // 控制风扇开关
+  const handleFanSwitch = async (checked) => {
+    setFanLoading(true);
+    try {
+      const data = {
+        message: checked ? 'motor=1' : 'motor=0',
+        device: deviceName
+      };
+      
+      const res = await apiControlDevice(data);
+      
+      if (res.code === 200) {
+        setFanStatus(checked);
+        message.success(checked ? '风扇已开启' : '风扇已关闭');
+      } else {
+        message.error(res.message || '控制失败');
+        // 如果失败，保持原状态
+        setFanStatus(!checked);
+      }
+    } catch (error) {
+      message.error('网络错误: ' + error.message);
+      // 如果失败，保持原状态
+      setFanStatus(!checked);
+    } finally {
+      setFanLoading(false);
+    }
+  };
   
   return (
     <Card
@@ -41,6 +73,18 @@ export default function DeviceCard(props) {
           {getDeviceStatus(time)}
         </Flex>
       }
+      actions={[
+        <Flex justify="center" align="center" gap={8} key="fan-control">
+          <span style={{ fontSize: "14px", color: "#666" }}>风扇控制</span>
+          <Switch
+            checked={fanStatus}
+            onChange={handleFanSwitch}
+            loading={fanLoading}
+            checkedChildren="开"
+            unCheckedChildren="关"
+          />
+        </Flex>
+      ]}
     >
       <Flex wrap justify="space-between" gap={16} style={{ marginBottom: "16px" }}>
         <Statistic

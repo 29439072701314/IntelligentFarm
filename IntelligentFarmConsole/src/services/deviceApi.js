@@ -14,3 +14,6 @@ export const apiUnbindDeviceFromFarm = (data) => post("/api/device/unbindFarm", 
 
 // 根据农场ID获取设备列表
 export const apiGetDevicesByFarmId = (farmId) => get("/api/device/getByFarmId", { farmId });
+
+// 控制设备（风扇等）
+export const apiControlDevice = (data) => post("/api/device/control", data);

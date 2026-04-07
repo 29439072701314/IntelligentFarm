@@ -115,7 +115,7 @@ const FeedStockList = () => {
             <Select placeholder="请选择饲料配方">
               {formulaList.map(formula => (
                 <Option key={formula.id} value={formula.id}>
-                  {formula.formulaName}
+                  {formula.name}
                 </Option>
               ))}
             </Select>

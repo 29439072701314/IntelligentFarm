@@ -18,17 +18,13 @@ export const getDeviceStatus = (time) => {
   const diff = now - new Date(time);
   const min = diff / (1000 * 60);
   let status;
-  // 1分钟内为正常
+  // 1分钟内有数据为正常
   if (min < 1) {
     status = deviceStatusMap[0];
   }
-  // 5分钟内为异常
-  else if (min < 5) {
-    status = deviceStatusMap[1];
-  }
-  // 大于5分钟为离线
+  // 1分钟没有数据则显示异常
   else {
-    status = deviceStatusMap[2];
+    status = deviceStatusMap[1];
   }
   return <Tag color={status.color}>{status.label}</Tag>;
 };
