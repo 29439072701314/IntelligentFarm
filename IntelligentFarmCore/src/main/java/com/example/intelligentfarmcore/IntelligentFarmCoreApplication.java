@@ -1,9 +1,7 @@
 package com.example.intelligentfarmcore;
 
-import com.example.intelligentfarmcore.utils.DataSimulator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import javax.annotation.PostConstruct;
@@ -31,14 +29,8 @@ public class IntelligentFarmCoreApplication {
         });
         
         System.out.println("Running SpringApplication...");
-        ApplicationContext context = SpringApplication.run(IntelligentFarmCoreApplication.class, args);
-        
-        // 启动数据模拟器
-        System.out.println("Getting DataSimulator bean...");
-        DataSimulator dataSimulator = context.getBean(DataSimulator.class);
-        System.out.println("Starting data simulator...");
-        dataSimulator.start();
-        System.out.println("Data simulator started");
+        SpringApplication.run(IntelligentFarmCoreApplication.class, args);
+        System.out.println("Application started successfully");
     }
 
 }

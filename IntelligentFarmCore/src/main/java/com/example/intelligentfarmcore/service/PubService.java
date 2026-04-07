@@ -12,9 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import io.github.cdimascio.dotenv.Dotenv;
 
-public class PubDemo {
+public class PubService {
 
-    public static void main(String[] args) throws Exception {
+    public static void pubMessage(String message, String device) {
         // 加载.env文件
         Dotenv dotenv = Dotenv.load();
 
@@ -35,10 +35,10 @@ public class PubDemo {
         IAcsClient client = new DefaultAcsClient(profile);
 
         PubRequest request = new PubRequest();
-        request.setIotInstanceId("iot-06z00hax6b0i8g0");
-        request.setProductKey("k1x0t4xETH9");
-        request.setTopicFullName("/k1x0t4xETH9/Environmental/user/get");
-        String originalText = "isFallDown=0";
+        request.setIotInstanceId("iot-06z00c0urg9jzkj");
+        request.setProductKey("k1x0uTgSIUt");
+        request.setTopicFullName("/k1x0uTgSIUt/" + device + "/user/get");
+        String originalText = message;
         byte[] textBytes = originalText.getBytes(StandardCharsets.UTF_8);
         String base64Encoded = Base64.getEncoder().encodeToString(textBytes);
         request.setMessageContent(base64Encoded);

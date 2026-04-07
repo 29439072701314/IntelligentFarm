@@ -4,6 +4,7 @@ import com.example.intelligentfarmcore.pojo.dto.DeviceDTO;
 import com.example.intelligentfarmcore.pojo.model.ResponseMessage;
 import com.example.intelligentfarmcore.pojo.request.PageReq;
 import com.example.intelligentfarmcore.pojo.response.PageRes;
+import com.example.intelligentfarmcore.service.PubService;
 import com.example.intelligentfarmcore.service.interfaces.IDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +50,19 @@ public class DeviceController {
     @GetMapping("/getByFarmId")
     public ResponseMessage<List<DeviceDTO>> getDevicesByFarmId(@RequestParam Long farmId) {
         return deviceService.getDevicesByFarmId(farmId);
+    }
+
+    // 控制设备（风扇等）
+    @PostMapping("/control")
+    public ResponseMessage<String> controlDevice(@RequestBody Map<String, Object> params) {
+        String message = params.get("message").toString();
+        String device = params.get("device").toString();
+        
+        try {
+            PubService.pubMessage(message, device);
+            return ResponseMessage.success("指令发送成功");
+        } catch (Exception e) {
+            return ResponseMessage.error("指令发送失败: " + e.getMessage());
+        }
     }
 }

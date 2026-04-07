@@ -15,8 +15,6 @@ public interface EnvironmentSensorDao extends JpaRepository<EnvironmentData, Lon
                     "(:deviceId IS NULL OR d.deviceId = :deviceId) " +
                     "AND d.time >= :minTime " +
                     "AND d.time <= :maxTime " +
-                    "AND d.temperature >= 12 " +
-                    "AND d.temperature <= 20 " +
                     "ORDER BY d.time ASC")
     List<EnvironmentData> findByConditions(
                     @Param("deviceId") Long deviceId,
