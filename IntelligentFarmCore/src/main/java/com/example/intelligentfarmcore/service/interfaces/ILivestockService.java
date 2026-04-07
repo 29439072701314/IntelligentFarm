@@ -27,4 +27,7 @@ public interface ILivestockService {
 
     // 牲畜出库
     ResponseMessage<Livestock> outStock(Long livestockId, String operator, String remark);
+
+    // 获取所有牲畜
+    ResponseMessage<?> getAllLivestock();
 }

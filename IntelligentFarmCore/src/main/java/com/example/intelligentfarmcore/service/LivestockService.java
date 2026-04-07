@@ -214,6 +214,12 @@ public class LivestockService implements ILivestockService {
         }
         return ResponseMessage.success(livestock);
     }
+
+    @Override
+    public ResponseMessage<?> getAllLivestock() {
+        List<Livestock> livestockList = livestockDao.findAll();
+        return ResponseMessage.success(livestockList);
+    }
     
     @Autowired
     private WarningService warningService;

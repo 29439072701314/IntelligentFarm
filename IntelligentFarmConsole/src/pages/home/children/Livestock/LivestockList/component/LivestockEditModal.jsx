@@ -65,7 +65,7 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
 
   return (
     <Modal
-      title={livestock ? "编辑牲畜" : "新增牲畜"}
+      title={livestock ? "编辑牲畜" : (farmId ? "牲畜入库" : "新增牲畜")}
       open={visible}
       onCancel={onClose}
       footer={[
@@ -79,7 +79,7 @@ export default function LivestockEditModal({ visible, onClose, onSuccess, livest
           onClick={() => form.submit()}
         >
           确定
-        </Button>,
+        </Button>
       ]}
     >
       <Form

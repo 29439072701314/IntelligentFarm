@@ -118,7 +118,7 @@ export default function LivestockList() {
         columns={getColumns(handleEdit, null, handleDetail, handleInStock, handleOutStock)}
         extraOptions={[
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            添加
+            {farmId ? "入库" : "添加"}
           </Button>,
         ]}
       />
