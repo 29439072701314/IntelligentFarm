@@ -23,15 +23,26 @@ public class EnvironmentSensorService implements IEnvironmentSensorService {
     @Override
     public void addEnvironmentSensor(EnvironmentData environmentData) {
         environmentSensorDao.save(environmentData);
-        
-        // 检查温度是否超过28℃，如果是，生成环境告警
-        if (environmentData.getTemperature() != null && environmentData.getTemperature() > 28) {
-            String deviceId = environmentData.getDeviceId().toString();
-            String details = "温度超过28℃，当前温度：" + environmentData.getTemperature() + "℃";
+
+        String deviceId = environmentData.getDeviceId().toString();
+        boolean hasWarning = false;
+
+        // 检查温度是否超过30℃，如果是，生成环境告警
+        if (environmentData.getTemperature() != null && environmentData.getTemperature() > 30) {
+            String details = "温度超过30℃，当前温度：" + environmentData.getTemperature() + "℃";
             warningService.generateWarning("环境", deviceId, details, "高");
-        } else if (environmentData.getTemperature() != null && environmentData.getTemperature() <= 28) {
-            // 温度恢复正常，消除告警
-            String deviceId = environmentData.getDeviceId().toString();
+            hasWarning = true;
+        }
+
+        // 检查烟雾浓度是否超过3000，如果是，生成环境告警
+        if (environmentData.getGasConcentration() != null && environmentData.getGasConcentration() > 3000) {
+            String details = "烟雾浓度超过3000，当前浓度：" + environmentData.getGasConcentration();
+            warningService.generateWarning("环境", deviceId, details, "高");
+            hasWarning = true;
+        }
+
+        // 如果没有告警，消除该设备的环境告警
+        if (!hasWarning) {
             warningService.eliminateEnvironmentWarning(deviceId);
         }
     }
