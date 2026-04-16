@@ -175,12 +175,22 @@ public class LivestockService implements ILivestockService {
         String oldHealthStatus = existingLivestock.getHealthStatus();
         Double oldWeight = existingLivestock.getWeight();
         
-        // 更新牲畜信息
-        existingLivestock.setLivestockName(livestock.getLivestockName());
-        existingLivestock.setLivestockType(livestock.getLivestockType());
-        existingLivestock.setFarmId(livestock.getFarmId());
-        existingLivestock.setHealthStatus(livestock.getHealthStatus());
-        existingLivestock.setWeight(livestock.getWeight());
+        // 更新牲畜信息，只更新非空字段
+        if (livestock.getLivestockName() != null) {
+            existingLivestock.setLivestockName(livestock.getLivestockName());
+        }
+        if (livestock.getLivestockType() != null) {
+            existingLivestock.setLivestockType(livestock.getLivestockType());
+        }
+        if (livestock.getFarmId() != null) {
+            existingLivestock.setFarmId(livestock.getFarmId());
+        }
+        if (livestock.getHealthStatus() != null) {
+            existingLivestock.setHealthStatus(livestock.getHealthStatus());
+        }
+        if (livestock.getWeight() != null) {
+            existingLivestock.setWeight(livestock.getWeight());
+        }
         
         Livestock updatedLivestock = livestockDao.save(existingLivestock);
         

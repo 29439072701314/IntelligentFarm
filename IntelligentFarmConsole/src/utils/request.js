@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ERROR_CODE, HTTP_STATUS } from "../constant";
 import { message } from "antd";
-export const BASE_URL = "http://localhost:8081";
+export const BASE_URL = "http://localhost:8080";
 
 // 封装axios
 const instance = axios.create({

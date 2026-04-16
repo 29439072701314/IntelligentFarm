@@ -17,3 +17,6 @@ export const apiGetDevicesByFarmId = (farmId) => get("/api/device/getByFarmId", 
 
 // 控制设备（风扇等）
 export const apiControlDevice = (data) => post("/api/device/control", data);
+
+// 获取重量传感器数据
+export const apiGetWeightDeviceByDeviceName = (deviceName) => get("/api/weightDevice/getByDeviceName", { deviceName });

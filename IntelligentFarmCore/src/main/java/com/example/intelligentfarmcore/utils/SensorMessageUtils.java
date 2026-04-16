@@ -2,6 +2,7 @@ package com.example.intelligentfarmcore.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.intelligentfarmcore.pojo.entity.EnvironmentData;
+import com.example.intelligentfarmcore.pojo.entity.WeightDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,47 @@ public class SensorMessageUtils {
             return environmentData;
         } catch (Exception e) {
             logger.error("解析消息为EnvironmentSensor对象时出错", e);
+            return null;
+        }
+    }
+
+    /**
+     * 解析传感器消息并转换为WeightDevice对象
+     * 
+     * @param payload 传感器消息的JSON字符串
+     * @return 转换后的WeightDevice对象，解析失败或无重量数据返回null
+     */
+    public static WeightDevice parseWeightDeviceMessage(String payload) {
+        try {
+            // 解析JSON格式的payload
+            JSONObject jsonObject = JSONObject.parseObject(payload);
+
+            // 提取设备名称
+            String deviceName = jsonObject.getString("deviceName");
+
+            // 提取items部分
+            JSONObject items = jsonObject.getJSONObject("items");
+
+            // 检查是否包含weight字段
+            if (!items.containsKey("weight")) {
+                return null;
+            }
+
+            // 提取时间戳（使用weight的time）
+            long time = items.getJSONObject("weight").getLong("time");
+
+            // 提取重量
+            int weight = items.getJSONObject("weight").getInteger("value");
+
+            // 创建WeightDevice对象
+            WeightDevice weightDevice = new WeightDevice();
+            weightDevice.setDeviceName(deviceName);
+            weightDevice.setTime(time);
+            weightDevice.setWeight(weight);
+
+            return weightDevice;
+        } catch (Exception e) {
+            logger.error("解析消息为WeightDevice对象时出错", e);
             return null;
         }
     }

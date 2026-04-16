@@ -6,13 +6,13 @@ char ESP_InitCmd[8][400] = {
     "AT+CWMODE=1\r\n",
     "AT+CIPSNTPCFG=1,8,\"ntp1.aliyun.com\"\r\n",
     "AT+CWJAP=\"MEIZU 18s\",\"1234567890\"\r\n",
-    "AT+MQTTUSERCFG=0,1,\"NULL\",\"Environmental&k1x0t4xETH9\",\"664790da4fa6fe59074ef414ca4333d1ddca9b3fe042b17f9b80b14654e42e16\",0,0,\"\"\r\n",
-    "AT+MQTTCLIENTID=0,\"k1x0t4xETH9.Environmental|securemode=2\\,signmethod=hmacsha256\\,timestamp=1765969085677|\"\r\n",
-    "AT+MQTTCONN=0,\"iot-06z00hax6b0i8g0.mqtt.iothub.aliyuncs.com\",1883,1\r\n",
-    // "AT+MQTTSUB=0,\"/sys/k1x0t4xETH9/Environmental/thing/service/property/set\",1\r\n",
-    // "AT+MQTTSUB=0,\"/sys/k1x0t4xETH9/Environmental/thing/service/property/get\",1\r\n",
-    "AT+MQTTSUB=0,\"/k1x0t4xETH9/Environmental/user/get\",1\r\n",
-    // "AT+MQTTSUB=0,\"/sys/k1x0t4xETH9/Environmental/thing/event/property/post_reply\",1\r\n"
+    "AT+MQTTUSERCFG=0,1,\"NULL\",\"farm001&k1x0uTgSIUt\",\"cdd3d813dffef28968aee399fde750b5041cd258aa38036fb69ecb729d2e9954\",0,0,\"\"\r\n",
+    "AT+MQTTCLIENTID=0,\"k1x0uTgSIUt.farm001|securemode=2\\,signmethod=hmacsha256\\,timestamp=1775557869335|\"\r\n",
+    "AT+MQTTCONN=0,\"iot-06z00c0urg9jzkj.mqtt.iothub.aliyuncs.com\",1883,1\r\n",
+    // "AT+MQTTSUB=0,\"/sys/k1x0uTgSIUt/farm001/thing/service/property/set\",1\r\n",
+    // "AT+MQTTSUB=0,\"/sys/k1x0uTgSIUt/farm001/thing/service/property/get\",1\r\n",
+    "AT+MQTTSUB=0,\"/k1x0uTgSIUt/farm001/user/get\",1\r\n",
+    // "AT+MQTTSUB=0,\"/sys/k1x0uTgSIUt/farm001/thing/event/property/post_reply\",1\r\n"
 };
 unsigned char ESP_buf[2048];                // ESP8266接收缓存
 unsigned short ESP_cnt = 0, ESP_cntPre = 0; // ESP8266接收缓存计数器
@@ -146,6 +146,8 @@ void USART2_IRQHandler(void)
     {
         if (ESP_cnt >= sizeof(ESP_buf)) ESP_cnt = 0; // 防止缓存溢出
         r = USART_ReceiveData(USART2);               //(USART2->DR);	//读取接收到的数据
+        // 打印接收到的消息
+        // USART_SendData(USART1, r);
         // 记录接收到的数据到缓存
         ESP_buf[ESP_cnt++] = r;
     }
@@ -180,7 +182,7 @@ void ESP_UploadSensorData(SensorData *data)
     strcat(jsonParams, "}\\,\\\"version\\\":\\\"1.0.0\\\"}");
 
     // 构建完整的AT指令
-    sprintf(cmd, "AT+MQTTPUB=0,\"/sys/k1x0t4xETH9/Environmental/thing/event/property/post\",\"%s\",0,0\r\n", jsonParams);
+    sprintf(cmd, "AT+MQTTPUB=0,\"/sys/k1x0uTgSIUt/farm001/thing/event/property/post\",\"%s\",0,0\r\n", jsonParams);
     // 发送AT指令(不回显)
     Usart_SendString(USART2, (unsigned char *)cmd, strlen((const char *)cmd));
 }

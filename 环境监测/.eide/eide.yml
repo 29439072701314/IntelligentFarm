@@ -57,10 +57,8 @@ virtualFolder:
         - path: APP/mq2/mq2.c
         - path: APP/esp8266/esp8266.c
         - path: APP/timer/timer.c
-        - path: APP/max30102/algorithm.c
-        - path: APP/max30102/max30102.c
-        - path: APP/max30102/max30102_iic.c
-        - path: APP/mpu6050/mpu6050.c
+        - path: APP/motor/motor.c
+        - path: APP/hx711/HX711.c
       folders: []
     - name: public
       files:
@@ -83,7 +81,6 @@ targets:
         - User
         - Libraries/CMSIS
         - Libraries/STM32F10x_StdPeriph_Driver/inc
-        - APP/dht11
         - APP/key
         - APP/led
         - public
@@ -91,10 +88,17 @@ targets:
         - APP/mq2
         - APP/esp8266
         - APP/timer
-        - APP/max30102
-        - APP/mpu6050
+        - APP/motor
+        - APP/hx711
+        - APP/dht11
       libList: []
-    excludeList: []
+    excludeList:
+      - <virtual_root>/APP/algorithm.c
+      - <virtual_root>/APP/max30102_iic.c
+      - <virtual_root>/APP/max30102.c
+      - <virtual_root>/APP/mpu6050.c
+    settings:
+      debugger: cortex-debug
     toolchain: AC5
     toolchainConfigMap:
       AC5:

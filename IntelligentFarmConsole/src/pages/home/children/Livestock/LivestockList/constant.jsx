@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button, Input, Tag, DatePicker, Modal, Form } from 'antd';
-import { EditOutlined, EyeOutlined, InboxOutlined, ExportOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined, InboxOutlined, ExportOutlined, DashboardOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 
-export const getColumns = (handleEdit, handleDelete, handleDetail, handleInStock, handleOutStock) => {
+export const getColumns = (handleEdit, handleDelete, handleDetail, handleInStock, handleOutStock, handleWeighing) => {
   return [
     {
       title: "牲畜编码",
@@ -104,6 +104,15 @@ export const getColumns = (handleEdit, handleDelete, handleDetail, handleInStock
             >
               编辑
             </Button>
+            {statusValue === 1 && (
+              <Button
+                type="link"
+                icon={<DashboardOutlined />}
+                onClick={() => handleWeighing(record)}
+              >
+                称重
+              </Button>
+            )}
             {statusValue === 1 && (
               <Button
                 type="link"

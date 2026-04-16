@@ -52,7 +52,7 @@ public class DeviceController {
         return deviceService.getDevicesByFarmId(farmId);
     }
 
-    // 控制设备（风扇等）
+    // 控制设备（风扇，称重等）
     @PostMapping("/control")
     public ResponseMessage<String> controlDevice(@RequestBody Map<String, Object> params) {
         String message = params.get("message").toString();

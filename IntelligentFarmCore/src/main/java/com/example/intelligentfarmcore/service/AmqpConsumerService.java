@@ -2,6 +2,8 @@ package com.example.intelligentfarmcore.service;
 
 import com.example.intelligentfarmcore.config.AmqpProperties;
 import com.example.intelligentfarmcore.pojo.entity.EnvironmentData;
+import com.example.intelligentfarmcore.pojo.entity.WeightDevice;
+import com.example.intelligentfarmcore.service.WeightDeviceService;
 import com.example.intelligentfarmcore.service.interfaces.IDeviceService;
 import com.example.intelligentfarmcore.service.interfaces.IEnvironmentSensorService;
 import com.example.intelligentfarmcore.utils.SensorMessageUtils;
@@ -32,6 +34,8 @@ public class AmqpConsumerService implements InitializingBean, DisposableBean {
     IEnvironmentSensorService environmentSensorService;
     @Autowired
     IDeviceService deviceService;
+    @Autowired
+    WeightDeviceService weightDeviceService;
     @Autowired
     private AmqpProperties amqpProperties;
 
@@ -152,6 +156,12 @@ public class AmqpConsumerService implements InitializingBean, DisposableBean {
                     // 保存到数据库
                     environmentData.setDeviceId(deviceId);
                     environmentSensorService.addEnvironmentSensor(environmentData);
+                }
+                // 解析重量数据（如果有）
+                WeightDevice weightDevice = SensorMessageUtils.parseWeightDeviceMessage(payload);
+                if (weightDevice != null) {
+                    // 添加或更新称重设备数据
+                    weightDeviceService.updateWeightDeviceData(weightDevice);
                 }
             } catch (Exception e) {
                 logger.error("处理消息异常", e);
